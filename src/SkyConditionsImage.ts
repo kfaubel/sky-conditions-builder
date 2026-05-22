@@ -132,10 +132,10 @@ export class SkyConditionsImage {
     private drawTitle(ctx: any, title: string): void {
         this.logger.verbose(`Drawing title: "${title}"`);
         ctx.fillStyle = this.TEXT_COLOR;
-        ctx.font = `24pt '${registeredFontName}'`;
+        ctx.font = `72pt '${registeredFontName}'`;
         
         // Center the title
-        const titleX = this.IMAGE_WIDTH / 2 - (title.length * 8);
+        const titleX = this.IMAGE_WIDTH / 2 - (title.length * 12);
         ctx.fillText(title, titleX, 40);
         this.logger.verbose(`  Title position: (${titleX}, 40)`);
     }
@@ -149,7 +149,7 @@ export class SkyConditionsImage {
         }
 
         ctx.fillStyle = this.TEXT_COLOR;
-        ctx.font = `14pt '${registeredFontName}'`;
+        ctx.font = `36pt '${registeredFontName}'`;
         
         const startTime = moment.tz(forecast.UTCStartTime, "UTC");
         this.logger.verbose(`Forecast start time: ${startTime.format('YYYY-MM-DD HH:mm')} UTC`);
@@ -202,12 +202,12 @@ export class SkyConditionsImage {
 
         // Draw location label above the rows
         ctx.fillStyle = this.TEXT_COLOR;
-        ctx.font = `18pt '${registeredFontName}'`;
+        ctx.font = `48pt '${registeredFontName}'`;
         ctx.fillText(location.label, this.LABEL_MARGIN, yOffset - 10);
         this.logger.verbose(`  Location label: "${location.label}" at (${this.LABEL_MARGIN}, ${yOffset - 10})`);
 
         // Draw labels for each data type (to the left of each row)
-        ctx.font = `14pt '${registeredFontName}'`;
+        ctx.font = `36pt '${registeredFontName}'`;
         ctx.fillText("Sky Cover", this.LABEL_MARGIN, yOffset + this.SQUARE_SIZE / 2 + 5);
         ctx.fillText("Seeing", this.LABEL_MARGIN, yOffset + this.SUB_ROW_HEIGHT + this.SQUARE_SIZE / 2 + 5);
         ctx.fillText("Wind Speed", this.LABEL_MARGIN, yOffset + this.SUB_ROW_HEIGHT * 2 + this.SQUARE_SIZE / 2 + 5);

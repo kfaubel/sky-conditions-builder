@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "start": "node sample.js",
+    "start": "npm run build && node sample.js",
     "lint": "eslint src/**/*.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
