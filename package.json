@@ -1,0 +1,39 @@
+{
+  "name": "sky-conditions-builder",
+  "version": "1.0.0",
+  "description": "Builder module to create sky condition images for astrophotography",
+  "license": "MIT",
+  "author": "Ken Faubel",
+  "type": "commonjs",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node sample.js",
+    "lint": "eslint src/**/*.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "pureimage": "^0.4.13",
+    "moment-timezone": "^0.5.45"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "keywords": [
+    "astrophotography",
+    "astronomy",
+    "weather",
+    "sky-conditions",
+    "astrospheric"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

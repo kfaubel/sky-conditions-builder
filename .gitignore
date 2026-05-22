@@ -1,0 +1,20 @@
+node_modules/
+*.js
+*.d.ts
+*.js.map
+*.d.ts.map
+.DS_Store
+*.log
+.vscode/
+dist/
+build/
+*.jpg
+*.png
+
+# Don't commit actual config with API key
+config.json
+
+# Allow mock implementation files
+!sample-with-mocks.js
+!generate-mock-data.js
+!mock-data-*.json

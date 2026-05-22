@@ -1,0 +1,23 @@
+{
+    "apiKey": "YOUR_ASTROSPHERIC_API_KEY_HERE",
+    "locations": [
+        {
+            "Label": "Onset, MA",
+            "Latitude": 41.75,
+            "Longitude": -70.644,
+            "Timezone": "America/New_York"
+        },
+        {
+            "Label": "Flagstaff, AZ",
+            "Latitude": 35.1983,
+            "Longitude": -111.6513,
+            "Timezone": "America/Phoenix"
+        },
+        {
+            "Label": "Mauna Kea, HI",
+            "Latitude": 19.8207,
+            "Longitude": -155.4681,
+            "Timezone": "Pacific/Honolulu"
+        }
+    ]
+}

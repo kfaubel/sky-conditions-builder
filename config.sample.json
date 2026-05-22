@@ -1,0 +1,27 @@
+{
+    "title": "Sky Conditions",
+    "baseURL": "https://astrosphericpublicaccess.azurewebsites.net/api/",
+    "apiKey": "YOUR_ASTROSPHERIC_API_KEY_HERE",
+    "cacheDurationMinutes": 1440,
+    "outputFilename": "sky-conditions.jpg",
+    "locations": [
+        {
+            "label": "Starfront",
+            "latitude": 31.55,
+            "longitude": -99.38,
+            "timezone": "America/Chicago"
+        },
+        {
+            "label": "Dunstable, MA",
+            "latitude": 42.68,
+            "longitude": -71.47,
+            "timezone": "America/New_York"
+        },
+        {
+            "label": "Onset, MA",
+            "latitude": 41.75,
+            "longitude": -71.25,
+            "timezone": "America/New_York"
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+// Sample usage of sky-conditions-builder
+// Save this as sample.js and run with: node sample.js
+
+const fs = require('fs');
+const { SkyConditionsImage } = require('./index.js');
+
+// Create a simple logger
+const logger = {
+    info: (...args) => console.log(...args),
+    verbose: (...args) => console.debug(...args),
+    warn: (...args) => console.warn(...args),
+    error: (...args) => console.error(...args)
+};
+
+async function run() {
+    const config = {
+        "title": "Sky Conditions",
+        "baseURL": "https://astrosphericpublicaccess.azurewebsites.net/api/",
+        "apiKey": " --- key here ---",
+        "outputFilename": "sky-conditions.jpg",
+        "locations": [
+            { "label": "Starfront", "latitude": 31.55, "longitude": -99.38, "timezone": "America/Chicago" },
+            { "label": "Dunstable, MA", "latitude": 42.68, "longitude": -71.47, "timezone": "America/New_York" },
+            { "label": "Onset, MA", "latitude": 41.75, "longitude": -71.25, "timezone": "America/New_York" }
+        ]
+    }
+
+    const skyImage = new SkyConditionsImage(logger);
+
+    try {
+        logger.info('Fetching sky conditions data...');
+        const result = await skyImage.getImageStream(config);
+
+        if (result !== null && result.jpegImg !== null) {
+            fs.writeFileSync('sky-conditions.jpg', result.jpegImg.data);
+            logger.info('Sky conditions image created successfully! -> sky-conditions.jpg');
+        } else {
+            logger.error("No jpegImg returned from getImageStream");
+        }
+    } catch (error) {
+        logger.error(`Error: ${error}`);
+    }
+}
+
+run();

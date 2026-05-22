@@ -1,0 +1,1717 @@
+{
+  "TimeZone": "America/Chicago",
+  "UTCMinuteOffset": -300,
+  "ModelTime": "2026-05-22T06:00:00Z",
+  "Latitude": 31.55,
+  "Longitude": -99.38,
+  "LocalStartTime": "2026-05-22T01:00:00",
+  "UTCStartTime": "2026-05-22T06:00:00Z",
+  "APICreditUsedToday": 0,
+  "RDPS_CloudCover": [
+    {
+      "Value": {
+        "ActualValue": 10,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 0
+    },
+    {
+      "Value": {
+        "ActualValue": 11.986693307950611,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 1
+    },
+    {
+      "Value": {
+        "ActualValue": 13.894183423086506,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 2
+    },
+    {
+      "Value": {
+        "ActualValue": 15.646424733950354,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 3
+    },
+    {
+      "Value": {
+        "ActualValue": 17.173560908995228,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 4
+    },
+    {
+      "Value": {
+        "ActualValue": 18.414709848078964,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 5
+    },
+    {
+      "Value": {
+        "ActualValue": 39.607714463172925,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 6
+    },
+    {
+      "Value": {
+        "ActualValue": 37.94814049973311,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 7
+    },
+    {
+      "Value": {
+        "ActualValue": 35.13194770826726,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 8
+    },
+    {
+      "Value": {
+        "ActualValue": 31.41069820350745,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 9
+    },
+    {
+      "Value": {
+        "ActualValue": 27.11680012089801,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 10
+    },
+    {
+      "Value": {
+        "ActualValue": 22.633814587851276,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 11
+    },
+    {
+      "Value": {
+        "ActualValue": 18.36219335057722,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 12
+    },
+    {
+      "Value": {
+        "ActualValue": 14.683507612240394,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 13
+    },
+    {
+      "Value": {
+        "ActualValue": 11.926363413796178,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 14
+    },
+    {
+      "Value": {
+        "ActualValue": 10.337048235023545,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 15
+    },
+    {
+      "Value": {
+        "ActualValue": 10.05753086746239,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 16
+    },
+    {
+      "Value": {
+        "ActualValue": 11.112779765084014,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 17
+    },
+    {
+      "Value": {
+        "ActualValue": 13.408532686660184,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 18
+    },
+    {
+      "Value": {
+        "ActualValue": 3.8814210905728075,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 19
+    },
+    {
+      "Value": {
+        "ActualValue": 2.4319750469207175,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 20
+    },
+    {
+      "Value": {
+        "ActualValue": 1.284242275864118,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 21
+    },
+    {
+      "Value": {
+        "ActualValue": 0.4839792611048388,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 22
+    },
+    {
+      "Value": {
+        "ActualValue": 0.06308996366535524,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 23
+    },
+    {
+      "Value": {
+        "ActualValue": 0.03835391164159496,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 24
+    },
+    {
+      "Value": {
+        "ActualValue": 0.41075725336861524,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 25
+    },
+    {
+      "Value": {
+        "ActualValue": 1.1654534427984693,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 26
+    },
+    {
+      "Value": {
+        "ActualValue": 2.2723551244401285,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 27
+    },
+    {
+      "Value": {
+        "ActualValue": 3.6873336212767915,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 28
+    },
+    {
+      "Value": {
+        "ActualValue": 5.353978205862434,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 29
+    },
+    {
+      "Value": {
+        "ActualValue": 31.18177727862635,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 30
+    },
+    {
+      "Value": {
+        "ActualValue": 26.86681635260595,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 31
+    },
+    {
+      "Value": {
+        "ActualValue": 22.385098281655306,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 32
+    },
+    {
+      "Value": {
+        "ActualValue": 18.13696159337018,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 33
+    },
+    {
+      "Value": {
+        "ActualValue": 14.501879686096865,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 34
+    },
+    {
+      "Value": {
+        "ActualValue": 11.804563600424949,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 35
+    },
+    {
+      "Value": {
+        "ActualValue": 10.285956549002632,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 36
+    },
+    {
+      "Value": {
+        "ActualValue": 10.081711176940162,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 37
+    },
+    {
+      "Value": {
+        "ActualValue": 11.210072115029865,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 38
+    },
+    {
+      "Value": {
+        "ActualValue": 13.5702462412145,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 39
+    },
+    {
+      "Value": {
+        "ActualValue": 16.951406229993474,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 40
+    },
+    {
+      "Value": {
+        "ActualValue": 21.051523129512958,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 41
+    },
+    {
+      "Value": {
+        "ActualValue": 25.50434570831705,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 42
+    },
+    {
+      "Value": {
+        "ActualValue": 17.343970978741133,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 43
+    },
+    {
+      "Value": {
+        "ActualValue": 15.849171928917617,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 44
+    },
+    {
+      "Value": {
+        "ActualValue": 14.121184852417567,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 45
+    },
+    {
+      "Value": {
+        "ActualValue": 12.22889914100246,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 46
+    },
+    {
+      "Value": {
+        "ActualValue": 10.247754254533577,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 47
+    },
+    {
+      "Value": {
+        "ActualValue": 8.256732187770186,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 48
+    },
+    {
+      "Value": {
+        "ActualValue": 6.335208707480716,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 49
+    },
+    {
+      "Value": {
+        "ActualValue": 4.559788891106303,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 50
+    },
+    {
+      "Value": {
+        "ActualValue": 3.0012531240645632,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 51
+    },
+    {
+      "Value": {
+        "ActualValue": 1.7217353091434635,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 52
+    },
+    {
+      "Value": {
+        "ActualValue": 0.7722457838719272,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 53
+    },
+    {
+      "Value": {
+        "ActualValue": 17.913670204023006,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 54
+    },
+    {
+      "Value": {
+        "ActualValue": 14.323219864463153,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 55
+    },
+    {
+      "Value": {
+        "ActualValue": 11.686494496277431,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 56
+    },
+    {
+      "Value": {
+        "ActualValue": 10.239024923775359,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 57
+    },
+    {
+      "Value": {
+        "ActualValue": 10.110109292940502,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 58
+    },
+    {
+      "Value": {
+        "ActualValue": 11.311263253132232,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 59
+    },
+    {
+      "Value": {
+        "ActualValue": 13.735191298424857,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 60
+    },
+    {
+      "Value": {
+        "ActualValue": 17.165371155599026,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 61
+    },
+    {
+      "Value": {
+        "ActualValue": 21.295395073950637,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 62
+    },
+    {
+      "Value": {
+        "ActualValue": 25.75634031710217,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 63
+    },
+    {
+      "Value": {
+        "ActualValue": 30.149723932298432,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 64
+    },
+    {
+      "Value": {
+        "ActualValue": 34.08309804579402,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 65
+    },
+    {
+      "Value": {
+        "ActualValue": 37.20510606260658,
+        "ValueColor": "#4169E1"
+      },
+      "HourOffset": 66
+    },
+    {
+      "Value": {
+        "ActualValue": 17.403758899524487,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 67
+    },
+    {
+      "Value": {
+        "ActualValue": 18.59161814856497,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 68
+    },
+    {
+      "Value": {
+        "ActualValue": 19.436956694441047,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 69
+    },
+    {
+      "Value": {
+        "ActualValue": 19.906073556948705,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 70
+    },
+    {
+      "Value": {
+        "ActualValue": 19.980266527163614,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 71
+    },
+    {
+      "Value": {
+        "ActualValue": 19.656577765492774,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 72
+    },
+    {
+      "Value": {
+        "ActualValue": 18.947911721405035,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 73
+    },
+    {
+      "Value": {
+        "ActualValue": 17.882520673753163,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 74
+    },
+    {
+      "Value": {
+        "ActualValue": 16.502878401571166,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 75
+    },
+    {
+      "Value": {
+        "ActualValue": 14.863986888537982,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 76
+    },
+    {
+      "Value": {
+        "ActualValue": 13.031183567457022,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 77
+    },
+    {
+      "Value": {
+        "ActualValue": 10.196266628190267,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 78
+    },
+    {
+      "Value": {
+        "ActualValue": 10.142717186542653,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 79
+    },
+    {
+      "Value": {
+        "ActualValue": 11.416324569900643,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 80
+    }
+  ],
+  "Astrospheric_Seeing": [
+    {
+      "Value": {
+        "ActualValue": 1.0354082633577495,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 0
+    },
+    {
+      "Value": {
+        "ActualValue": 0.420444128054252,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 1
+    },
+    {
+      "Value": {
+        "ActualValue": 1.097834669029363,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 2
+    },
+    {
+      "Value": {
+        "ActualValue": 0.6913692955647166,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 3
+    },
+    {
+      "Value": {
+        "ActualValue": 0.5376910163061897,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 4
+    },
+    {
+      "Value": {
+        "ActualValue": 0.7574033848727972,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 5
+    },
+    {
+      "Value": {
+        "ActualValue": 1.0826628160632874,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 6
+    },
+    {
+      "Value": {
+        "ActualValue": 2.8297229705151037,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 7
+    },
+    {
+      "Value": {
+        "ActualValue": 3.0777878503349556,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 8
+    },
+    {
+      "Value": {
+        "ActualValue": 2.870134609489807,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 9
+    },
+    {
+      "Value": {
+        "ActualValue": 3.869000748831996,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 10
+    },
+    {
+      "Value": {
+        "ActualValue": 3.5692327678335376,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 11
+    },
+    {
+      "Value": {
+        "ActualValue": 2.9097012740011508,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 12
+    },
+    {
+      "Value": {
+        "ActualValue": 2.5445159443144494,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 13
+    },
+    {
+      "Value": {
+        "ActualValue": 3.3700128828400766,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 14
+    },
+    {
+      "Value": {
+        "ActualValue": 3.5110284070655107,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 15
+    },
+    {
+      "Value": {
+        "ActualValue": 2.5283187772079736,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 16
+    },
+    {
+      "Value": {
+        "ActualValue": 3.3676979289155855,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 17
+    },
+    {
+      "Value": {
+        "ActualValue": 3.431304895788569,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 18
+    },
+    {
+      "Value": {
+        "ActualValue": 3.869867634351499,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 19
+    },
+    {
+      "Value": {
+        "ActualValue": 1.050260303211691,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 20
+    },
+    {
+      "Value": {
+        "ActualValue": 0.7631907465222261,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 21
+    },
+    {
+      "Value": {
+        "ActualValue": 0.8639646599245498,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 22
+    },
+    {
+      "Value": {
+        "ActualValue": 0.30328599605303364,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 23
+    },
+    {
+      "Value": {
+        "ActualValue": 0.9315395532795498,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 24
+    },
+    {
+      "Value": {
+        "ActualValue": 0.45819970127627274,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 25
+    },
+    {
+      "Value": {
+        "ActualValue": 0.8478071914755287,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 26
+    },
+    {
+      "Value": {
+        "ActualValue": 0.6431882107262823,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 27
+    },
+    {
+      "Value": {
+        "ActualValue": 0.801385948838037,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 28
+    },
+    {
+      "Value": {
+        "ActualValue": 0.7282815595424297,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 29
+    },
+    {
+      "Value": {
+        "ActualValue": 0.9396277074351542,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 30
+    },
+    {
+      "Value": {
+        "ActualValue": 3.075240555758805,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 31
+    },
+    {
+      "Value": {
+        "ActualValue": 3.526234636751529,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 32
+    },
+    {
+      "Value": {
+        "ActualValue": 2.8851747162167642,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 33
+    },
+    {
+      "Value": {
+        "ActualValue": 3.9476754782404035,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 34
+    },
+    {
+      "Value": {
+        "ActualValue": 2.272686778173001,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 35
+    },
+    {
+      "Value": {
+        "ActualValue": 2.7399805021170676,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 36
+    },
+    {
+      "Value": {
+        "ActualValue": 2.8146119748222387,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 37
+    },
+    {
+      "Value": {
+        "ActualValue": 2.0232276400360183,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 38
+    },
+    {
+      "Value": {
+        "ActualValue": 2.4106187097813447,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 39
+    },
+    {
+      "Value": {
+        "ActualValue": 2.004185140644954,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 40
+    },
+    {
+      "Value": {
+        "ActualValue": 2.918128962032331,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 41
+    },
+    {
+      "Value": {
+        "ActualValue": 2.5846433404245555,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 42
+    },
+    {
+      "Value": {
+        "ActualValue": 2.9622264694860863,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 43
+    },
+    {
+      "Value": {
+        "ActualValue": 0.3275266522031362,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 44
+    },
+    {
+      "Value": {
+        "ActualValue": 0.30413307008003904,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 45
+    },
+    {
+      "Value": {
+        "ActualValue": 0.686135343740695,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 46
+    },
+    {
+      "Value": {
+        "ActualValue": 0.4347819137519277,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 47
+    },
+    {
+      "Value": {
+        "ActualValue": 0.3080611802455975,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 48
+    },
+    {
+      "Value": {
+        "ActualValue": 0.5470020499882411,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 49
+    },
+    {
+      "Value": {
+        "ActualValue": 0.5025863867614927,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 50
+    },
+    {
+      "Value": {
+        "ActualValue": 1.0043035689959754,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 51
+    },
+    {
+      "Value": {
+        "ActualValue": 0.7403775191029511,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 52
+    },
+    {
+      "Value": {
+        "ActualValue": 0.6642118831723729,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 53
+    },
+    {
+      "Value": {
+        "ActualValue": 0.8087449915567568,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 54
+    },
+    {
+      "Value": {
+        "ActualValue": 3.877801665739762,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 55
+    },
+    {
+      "Value": {
+        "ActualValue": 2.343571229666684,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 56
+    },
+    {
+      "Value": {
+        "ActualValue": 2.892255482863968,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 57
+    },
+    {
+      "Value": {
+        "ActualValue": 3.019185718695451,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 58
+    },
+    {
+      "Value": {
+        "ActualValue": 3.8005305935465534,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 59
+    },
+    {
+      "Value": {
+        "ActualValue": 2.972727888769619,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 60
+    },
+    {
+      "Value": {
+        "ActualValue": 3.5680740595967775,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 61
+    },
+    {
+      "Value": {
+        "ActualValue": 2.5188216277419233,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 62
+    },
+    {
+      "Value": {
+        "ActualValue": 2.387251753385634,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 63
+    },
+    {
+      "Value": {
+        "ActualValue": 3.4295223285184426,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 64
+    },
+    {
+      "Value": {
+        "ActualValue": 2.1971478469742536,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 65
+    },
+    {
+      "Value": {
+        "ActualValue": 2.101336897036807,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 66
+    },
+    {
+      "Value": {
+        "ActualValue": 2.316719547536712,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 67
+    },
+    {
+      "Value": {
+        "ActualValue": 0.38538280690860593,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 68
+    },
+    {
+      "Value": {
+        "ActualValue": 0.5064930014189883,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 69
+    },
+    {
+      "Value": {
+        "ActualValue": 0.8692402314355352,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 70
+    },
+    {
+      "Value": {
+        "ActualValue": 0.48946257455658665,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 71
+    },
+    {
+      "Value": {
+        "ActualValue": 0.8383842775575281,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 72
+    },
+    {
+      "Value": {
+        "ActualValue": 1.0065487273650373,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 73
+    },
+    {
+      "Value": {
+        "ActualValue": 0.35042235105322134,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 74
+    },
+    {
+      "Value": {
+        "ActualValue": 0.3495330446081944,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 75
+    },
+    {
+      "Value": {
+        "ActualValue": 0.5939723571593447,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 76
+    },
+    {
+      "Value": {
+        "ActualValue": 0.3354137430439797,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 77
+    },
+    {
+      "Value": {
+        "ActualValue": 0.7964594554041442,
+        "ValueColor": "#87CEEB"
+      },
+      "HourOffset": 78
+    },
+    {
+      "Value": {
+        "ActualValue": 3.5985239141522705,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 79
+    },
+    {
+      "Value": {
+        "ActualValue": 2.5406957863582615,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 80
+    }
+  ],
+  "RDPS_WindVelocity": [
+    {
+      "Value": {
+        "ActualValue": 3.917983600075429,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 0
+    },
+    {
+      "Value": {
+        "ActualValue": 2.016941980582413,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 1
+    },
+    {
+      "Value": {
+        "ActualValue": 2.0254950506157368,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 2
+    },
+    {
+      "Value": {
+        "ActualValue": 3.5179781282302915,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 3
+    },
+    {
+      "Value": {
+        "ActualValue": 3.5283442268926306,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 4
+    },
+    {
+      "Value": {
+        "ActualValue": 2.2114384872219106,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 5
+    },
+    {
+      "Value": {
+        "ActualValue": 3.6211383779402784,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 6
+    },
+    {
+      "Value": {
+        "ActualValue": 2.058995159547967,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 7
+    },
+    {
+      "Value": {
+        "ActualValue": 3.9076014704400475,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 8
+    },
+    {
+      "Value": {
+        "ActualValue": 3.634767839730642,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 9
+    },
+    {
+      "Value": {
+        "ActualValue": 4.762137263979888,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 10
+    },
+    {
+      "Value": {
+        "ActualValue": 4.105966721432848,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 11
+    },
+    {
+      "Value": {
+        "ActualValue": 4.6796110115101985,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 12
+    },
+    {
+      "Value": {
+        "ActualValue": 4.822977656587935,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 13
+    },
+    {
+      "Value": {
+        "ActualValue": 4.155233820744136,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 14
+    },
+    {
+      "Value": {
+        "ActualValue": 4.105737894072881,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 15
+    },
+    {
+      "Value": {
+        "ActualValue": 4.06495982993373,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 16
+    },
+    {
+      "Value": {
+        "ActualValue": 3.512863016589307,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 17
+    },
+    {
+      "Value": {
+        "ActualValue": 2.158069940902704,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 18
+    },
+    {
+      "Value": {
+        "ActualValue": 2.7919851822799857,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 19
+    },
+    {
+      "Value": {
+        "ActualValue": 2.787053571973824,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 20
+    },
+    {
+      "Value": {
+        "ActualValue": 2.396580400199582,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 21
+    },
+    {
+      "Value": {
+        "ActualValue": 3.242429280375161,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 22
+    },
+    {
+      "Value": {
+        "ActualValue": 3.786634321073472,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 23
+    },
+    {
+      "Value": {
+        "ActualValue": 3.758146002587357,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 24
+    },
+    {
+      "Value": {
+        "ActualValue": 2.262810455835187,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 25
+    },
+    {
+      "Value": {
+        "ActualValue": 3.9139162246898875,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 26
+    },
+    {
+      "Value": {
+        "ActualValue": 2.9352166490850746,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 27
+    },
+    {
+      "Value": {
+        "ActualValue": 3.095187511221721,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 28
+    },
+    {
+      "Value": {
+        "ActualValue": 3.7853166774386087,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 29
+    },
+    {
+      "Value": {
+        "ActualValue": 3.0516161161368127,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 30
+    },
+    {
+      "Value": {
+        "ActualValue": 2.1196472648689078,
+        "ValueColor": "#00008B"
+      },
+      "HourOffset": 31
+    },
+    {
+      "Value": {
+        "ActualValue": 2.8149399637968195,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 32
+    },
+    {
+      "Value": {
+        "ActualValue": 3.035662082555233,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 33
+    },
+    {
+      "Value": {
+        "ActualValue": 5.7908164494610155,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 34
+    },
+    {
+      "Value": {
+        "ActualValue": 4.64263143169142,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 35
+    },
+    {
+      "Value": {
+        "ActualValue": 4.916020506724633,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 36
+    },
+    {
+      "Value": {
+        "ActualValue": 5.26684850377577,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 37
+    },
+    {
+      "Value": {
+        "ActualValue": 5.032189165066011,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 38
+    },
+    {
+      "Value": {
+        "ActualValue": 5.910481039533321,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 39
+    },
+    {
+      "Value": {
+        "ActualValue": 5.119637365757569,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 40
+    },
+    {
+      "Value": {
+        "ActualValue": 3.7025251716599454,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 41
+    },
+    {
+      "Value": {
+        "ActualValue": 2.7933902653905123,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 42
+    },
+    {
+      "Value": {
+        "ActualValue": 3.3571857690103486,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 43
+    },
+    {
+      "Value": {
+        "ActualValue": 2.8132473951503694,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 44
+    },
+    {
+      "Value": {
+        "ActualValue": 3.87883057558555,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 45
+    },
+    {
+      "Value": {
+        "ActualValue": 3.2224126081780735,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 46
+    },
+    {
+      "Value": {
+        "ActualValue": 3.3771593637058017,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 47
+    },
+    {
+      "Value": {
+        "ActualValue": 2.9582852800224906,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 48
+    },
+    {
+      "Value": {
+        "ActualValue": 2.4121522916322706,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 49
+    },
+    {
+      "Value": {
+        "ActualValue": 3.130737994501823,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 50
+    },
+    {
+      "Value": {
+        "ActualValue": 3.1566631550130166,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 51
+    },
+    {
+      "Value": {
+        "ActualValue": 3.2266215140983174,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 52
+    },
+    {
+      "Value": {
+        "ActualValue": 2.4352445287938824,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 53
+    },
+    {
+      "Value": {
+        "ActualValue": 2.7126867307940676,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 54
+    },
+    {
+      "Value": {
+        "ActualValue": 3.9175144118047274,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 55
+    },
+    {
+      "Value": {
+        "ActualValue": 3.7845414233181294,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 56
+    },
+    {
+      "Value": {
+        "ActualValue": 2.6003389009605873,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 57
+    },
+    {
+      "Value": {
+        "ActualValue": 5.622496129067624,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 58
+    },
+    {
+      "Value": {
+        "ActualValue": 5.777301738637875,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 59
+    },
+    {
+      "Value": {
+        "ActualValue": 5.944323635787672,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 60
+    },
+    {
+      "Value": {
+        "ActualValue": 4.329851413442901,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 61
+    },
+    {
+      "Value": {
+        "ActualValue": 5.812456503214126,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 62
+    },
+    {
+      "Value": {
+        "ActualValue": 4.687046171743276,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 63
+    },
+    {
+      "Value": {
+        "ActualValue": 5.367445247197771,
+        "ValueColor": "#0000FF"
+      },
+      "HourOffset": 64
+    },
+    {
+      "Value": {
+        "ActualValue": 3.667402836819661,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 65
+    },
+    {
+      "Value": {
+        "ActualValue": 2.412899953591084,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 66
+    },
+    {
+      "Value": {
+        "ActualValue": 3.3499321198077996,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 67
+    },
+    {
+      "Value": {
+        "ActualValue": 2.661829921586336,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 68
+    },
+    {
+      "Value": {
+        "ActualValue": 3.0529452714976872,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 69
+    },
+    {
+      "Value": {
+        "ActualValue": 3.246007605994077,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 70
+    },
+    {
+      "Value": {
+        "ActualValue": 3.5202222776538052,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 71
+    },
+    {
+      "Value": {
+        "ActualValue": 2.347483458596651,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 72
+    },
+    {
+      "Value": {
+        "ActualValue": 2.7012785893210545,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 73
+    },
+    {
+      "Value": {
+        "ActualValue": 3.014199204919423,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 74
+    },
+    {
+      "Value": {
+        "ActualValue": 3.5370958547253113,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 75
+    },
+    {
+      "Value": {
+        "ActualValue": 2.6867484574128664,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 76
+    },
+    {
+      "Value": {
+        "ActualValue": 2.3081327637284685,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 77
+    },
+    {
+      "Value": {
+        "ActualValue": 2.851927955310043,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 78
+    },
+    {
+      "Value": {
+        "ActualValue": 3.9254892690866185,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 79
+    },
+    {
+      "Value": {
+        "ActualValue": 2.769555525634022,
+        "ValueColor": "#0000CD"
+      },
+      "HourOffset": 80
+    }
+  ]
+}

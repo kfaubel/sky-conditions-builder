@@ -1,0 +1,229 @@
+I need to build build an NPM module similar to this one: https://github.com/kfaubel/weather-builder.git.  It should use typescript like weather builder
+
+This module should build a 1920x1080 jpg image that shows 3 locations and the astrophotography outlook for each location.  Each location should be a horizontal row with a grid across the image.  The grid should show color coded data for each 2 hour period for the next three days.  Each location has 3 types of data: Sky cover, atmospheric seeing, and wind speed. 
+
+THe sky cover should get data from https://www.astrospheric.com/DynamicContent/api_info.html for the lat/lon specified and should render squares that are colored from very dark blue (no clouds), medium dark blue for greater than 0% but less than 10%, medium blue for 10-20% clouds, light blue for 20-50%, very light blue for 50-80% and white for greater than 80% cloud cover.  This should be easy to change based on feedback.  Part of the config will include a valid API key.
+
+Astmospheric seeing should get data from https://www.astrospheric.com/DynamicContent/api_info.html for the lat/lon specified and render squares, like for sky cover, color coded to range from great seeing (dark blue) to poor seeing (white).  Part of the config will include a valid API key.
+
+There should also be a row of squares for Wind speed.  Very dark blue for calm up to white for greater than 20 mph.
+
+The input should be a JSON element with and array of 3 locations.  Each location should have a label (e.g."Onset, MA") a latitude and longitude, and a timezone for that location.
+
+Hopefully we can get data for earlier in the first day but if not, we should not render any squares.  The x-axis should be labeled every 12 hours and there should be a vertical red line for to show the current time the image was rendered.
+
+Drawing on the canvas should use the same library that weather-builder uses with parameters for layout at the top, similar to weather-builder.
+
+It should have the same external interface except for how parameters are specified.  It will be called in the same way as weather-builder.  There are 10+ other modules that have a similar format so we want this to be very similar.
+
+================================================================================
+CLARIFYING QUESTIONS - Please answer below each question:
+================================================================================
+
+1. MODULE DETAILS:
+   Q: What should the NPM module be named?
+   A: sky-conditions-builder
+
+   Q: What version should we start with (e.g., 1.0.0)?
+   A: 1.0.0
+
+2. LAYOUT & DESIGN:
+   Q: Should each location row have a header/label showing the location name?
+   A: Yes, each location row should have a header/label showing the location name.
+
+   Q: How should the 3 data types (sky cover, seeing, wind) be arranged for each location?
+      - Horizontally (3 columns side by side)?
+      - Vertically (3 sub-rows stacked)?
+   A: Vertically (3 sub-rows stacked)
+
+   Q: Should there be a legend explaining the color coding?
+   A: No
+
+   Q: What should the background color of the image be?
+   A: Dark gray (e.g., #333333)
+
+3. DATA & API:
+   Q: What are the specific Astrospheric API field names for:
+      - Sky cover/cloud cover percentage?
+      - Atmospheric seeing value?
+      - Wind speed?
+   A: See https://www.astrospheric.com/DynamicContent/api_info.html for the specific field names.
+
+   Q: What are the exact numeric ranges and breakpoints for atmospheric seeing?
+      (e.g., 0-1 = excellent/dark blue, 1-2 = good, etc.)
+   A: 0 - white, 1 - light blue, 2 - medium blue, 3 - medium dark blue, 4+ - very dark blue
+
+   Q: What are the exact wind speed ranges and color breakpoints?
+      (e.g., 0-5 mph = very dark blue, 5-10 = ?, 10-15 = ?, 15-20 = ?, >20 = white)
+   A: 0-5 mph = very dark blue, 5-10 mph = medium dark blue, 10-15 mph = medium blue, 15-20 mph = light blue, >20 mph = white
+
+   Q: Should we use a single API key for all locations or one per location?
+   A: one key total for all locations
+
+   Q: How should we handle API failures or missing data?
+      - Show error message on image?
+      - Leave squares blank/gray?
+      - Throw an error?
+   A: Throw an error
+
+4. TIME & TIMEZONE:
+   Q: Should the current time red line use:
+      - UTC time?
+      - A specific timezone from config?
+      - The timezone of the first location?
+   A: The timezone of each location.  This means that the red line will be in different positions for each location row based on their respective timezones.
+
+   Q: Should time labels on x-axis show:
+      - Date and time?
+      - Just time?
+      - 12-hour or 24-hour format?
+   A: Lets use 12AM and 12PM.
+
+5. JSON CONFIG FORMAT:
+   Q: Please provide an example of the complete JSON config structure including:
+      - API key location
+      - Location array format
+      - Any other parameters (output path, cache settings, etc.)
+   A: {
+  "apiKey": "your_api_key_here",
+  "locations": [
+    { "Label": "Onset, MA", "Latitude": 41.75, "Longitude": -71.25, "Timezone": "America/New_York" },
+    { "Label": "Location 2", ... },
+    { "Label": "Location 3", ... }
+  ]
+}
+
+   The output file should just be called sky-conditions.jpg and should be saved in the current working directory.
+
+6. GRID DIMENSIONS:
+   Q: What should the dimensions of each colored square be (in pixels)?
+   A: Lets start with 40x40 pixels per square.  This may change based on feedback and how it fits within the overall 1920x1080 layout.
+
+================================================================================
+IMPLEMENTATION NOTES & LESSONS LEARNED
+================================================================================
+
+1. **CRITICAL - Font Registration (pureimage library)**
+   - Text labels WILL NOT APPEAR without explicit font registration
+   - Font MUST be registered BEFORE creating any canvas/image context
+   - Working solution pattern:
+     ```javascript
+     const PImage = require('pureimage');
+     const fontPath = "C:\\Windows\\Fonts\\arial.ttf"; // Or system font path
+     const fnt = PImage.registerFont(fontPath, "Arial");
+     fnt.loadSync(); // MUST call loadSync() or await load()
+     
+     // Then in drawing code:
+     ctx.font = "24pt 'Arial'"; // Font name MUST match registration name
+     ctx.fillText("Text", x, y);
+     ```
+   - Font registration is GLOBAL in pureimage - register once per process
+   - For module-level font loading, place registration code at TOP of module before class definition
+
+2. **PImage Import Syntax (CommonJS TypeScript)**
+   - Use: `import * as PImage from "pureimage";`
+   - NOT: `import PImage from "pureimage";`
+   - This is required for CommonJS module compatibility with TypeScript
+
+3. **Astrospheric API Response Structure**
+   - API endpoint: POST to https://astrosphericpublicaccess.azurewebsites.net/api/GetForecastData_V1
+   - Request body: `{"Latitude": number, "Longitude": number, "APIKey": "string"}`
+   - Response is DEEPLY NESTED:
+     ```typescript
+     forecast.RDPS_CloudCover[i]?.Value?.ActualValue  // NOT just .Value
+     forecast.RDPS_Seeing[i]?.Value?.ActualValue
+     forecast.RDPS_WindSpeed10m[i]?.Value?.ActualValue
+     ```
+   - Each data point: `{Value: {ValueColor: string, ActualValue: number}, HourOffset: number}`
+   - API costs 5 credits per location per call
+   - Rate limiting: Watch for 403 "API Key Call count has been reached"
+
+4. **Layout Constants That Work Well**
+   ```typescript
+   IMAGE_WIDTH = 1920, IMAGE_HEIGHT = 1080
+   LEFT_MARGIN = 200  // Space for row labels on left
+   TOP_MARGIN = 100   // Space for title and time labels
+   SQUARE_SIZE = 40   // 40x40 pixel data squares
+   SQUARE_BORDER = 2  // 2px border between squares
+   LOCATION_ROW_HEIGHT = 280  // Height for each location's 3 sub-rows
+   SUB_ROW_HEIGHT = 60  // Height for each data type row
+   TIME_INTERVAL = 2  // Show every 2 hours
+   NUM_SQUARES = 36   // 72 hours / 2 hours = 36 squares
+   ```
+
+5. **Color Schemes (Finalized)**
+   - **Cloud Cover**: Dark blue (#00008B) → White (#FFFFFF)
+     - Inverted scale: 0% = best (dark blue), 80%+ = worst (white)
+   - **Seeing**: White (#FFFFFF) → Dark blue (#00008B)  
+     - 0 = best (white), 4+ = worst (dark blue)
+   - **Wind Speed**: Dark blue (#00008B) → White (#FFFFFF)
+     - 0-5 mph = best (dark blue), 20+ mph = worst (white)
+   - Background: #333333 (dark gray)
+   - Text: #FFFFFF (white)
+   - Grid lines: #666666 (gray)
+   - Current time line: #FF0000 (red)
+
+6. **Timezone Handling**
+   - Each location has its own timezone
+   - Current time red line position DIFFERS per location row
+   - Use moment-timezone for timezone conversions
+   - Format: `moment.tz(location.timezone)` for current time in that zone
+
+7. **Visual Features Implemented**
+   - Title at top center (configurable, default "Sky Conditions")
+   - Time labels every 12 hours (12AM, 12PM) above squares
+   - Gray vertical lines at midnight boundaries for day separation
+   - Red vertical line showing current time per location timezone
+   - Location name label above each row
+   - Data type labels on left: "Sky Cover", "Seeing", "Wind Speed"
+
+8. **Logging Best Practices (from weather-builder)**
+   - Log data extraction for first 3 values: `[0]=value, [1]=value, [2]=value`
+   - Log API calls with coordinates
+   - Log layout calculations (positions, dimensions)
+   - Log font registration status
+   - Use verbose level for detailed debug info
+   - Log current time per timezone for red line placement
+
+9. **Common Pitfalls to Avoid**
+   - ❌ DO NOT make sequential string replacements in files - they can corrupt template literals
+   - ❌ DO NOT try to fix font issues by editing compiled .js files directly
+   - ❌ DO NOT forget to call font.loadSync() after PImage.registerFont()
+   - ❌ DO NOT access API data as `.Value` - it's `.Value.ActualValue`
+   - ❌ DO NOT use different font names in registration vs ctx.font assignment
+   - ✅ DO test font rendering in isolation first (small test file)
+   - ✅ DO load fonts at module level or before module import
+   - ✅ DO preserve working color/layout code when fixing text issues
+
+10. **Config Properties (lowercase convention)**
+    - Use lowercase property names in config: `apiKey`, `title`, `baseURL`, `outputFilename`, `locations`
+    - Location properties: `label`, `latitude`, `longitude`, `timezone`
+    - This matches the weather-builder convention
+
+11. **Wind Speed Units**
+    - API returns wind speed in meters per second (m/s)
+    - Convert to mph: `windMph = windMs * 2.237`
+    - Color thresholds use mph values
+
+12. **Files to Keep Clean**
+    - `src/types.ts` - Type definitions (stable)
+    - `src/Logger.ts` - Logger interface (stable)
+    - `src/AstrosphericAPI.ts` - API client (stable, uses POST)
+    - `src/index.ts` - Module entry point (stable)
+    - `package.json` - Dependencies and scripts
+    - `tsconfig.json` - TypeScript config
+    - Main complexity is in `src/SkyConditionsImage.ts` (drawing logic + font handling)
+
+   Q: Should there be spacing/borders between squares?
+   A: Yes, there should be a 2 pixel border between squares.
+
+7. ERROR HANDLING:
+   Q: What should happen if fewer or more than 3 locations are provided?
+   A: Leave the extra rows blank if fewer than 3 locations are provided.  If more than 3 locations are provided, only use the first 3 and ignore the rest.
+
+8. CACHING:
+   Q: Should API responses be cached (like weather-builder does)?
+   A: No, not initially.  This will be called every hour and the data should be fresh.  If we find that we are hitting API limits, we can add caching later.
+
+   Q: If yes, what should the cache duration be?
+   A: Probably no.  This will be called every hour and the data should be fresh.  If we find that we are hitting API limits, we can add caching later.  The data is updated every 6 hours so if we can know how long until the next update, we can set the cache duration to that time.  But for now, no caching.
