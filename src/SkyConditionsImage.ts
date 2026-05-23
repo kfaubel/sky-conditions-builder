@@ -1,8 +1,9 @@
 import * as PImage from "pureimage";
 import * as moment from "moment-timezone";
 import * as fs from "fs";
+import { Writable } from "stream";
 import { Logger } from "./Logger";
-import { SkyConditionsConfig, Location, ImageResult, AstrosphericResponse, HourValue } from "./types";
+import { SkyConditionsConfig, Location, ImageResult, AstrosphericResponse } from "./types";
 import { AstrosphericAPI } from "./AstrosphericAPI";
 
 // ============================================================================
@@ -51,18 +52,19 @@ export class SkyConditionsImage {
     private readonly GRID_COLOR = "#666666";
     private readonly CURRENT_TIME_COLOR = "#FF0000";
     
-    private readonly LEFT_MARGIN = 200;     // Space for row labels
-    private readonly TOP_MARGIN = 100;      // Space for title and time labels
-    private readonly SQUARE_SIZE = 40;      // 40x40 pixel squares
+    private readonly LEFT_MARGIN = 260;     // Space for row labels (moved right for larger labels)
+    private readonly TOP_MARGIN = 260;      // Space for title and time labels (moved further down)
+    private readonly SQUARE_WIDTH = 20;     // Narrow squares horizontally (hours across)
+    private readonly SQUARE_HEIGHT = 40;    // Taller squares vertically (previous height)
     private readonly SQUARE_BORDER = 2;     // Border between squares
-    private readonly SQUARE_WITH_BORDER = this.SQUARE_SIZE + this.SQUARE_BORDER;
+    private readonly SQUARE_WITH_BORDER = this.SQUARE_WIDTH + this.SQUARE_BORDER;
     
-    private readonly LOCATION_ROW_HEIGHT = 280;  // Height for each location's 3 sub-rows
-    private readonly SUB_ROW_HEIGHT = 60;        // Height for each data type row
+    private readonly LOCATION_ROW_HEIGHT = 340;  // Height for each location's 3 sub-rows (increased for larger label)
+    private readonly SUB_ROW_HEIGHT = 80;        // Height for each data type row (increased spacing)
     
-    private readonly TIME_INTERVAL = 2;     // Show every 2 hours
-    private readonly NUM_SQUARES = 36;      // 72 hours / 2 hours
-    private readonly LABEL_MARGIN = 10;     // Left margin for labels
+    private readonly TIME_INTERVAL = 1;     // Show every 1 hour
+    private readonly NUM_SQUARES = 72;      // 72 hours / 1 hour
+    private readonly LABEL_MARGIN = 20;     // Left margin for labels (more room)
 
     constructor(logger: Logger) {
         this.logger = logger;
@@ -103,17 +105,26 @@ export class SkyConditionsImage {
 
         // Draw time labels (using first forecast)
         const firstForecast = forecasts.find(f => f !== null);
+
+        // Keep the original spacing between location groups; only tighten spacing between the three sub-rows.
+        const locationsCount = config.locations.length || 1;
+        const locationRowHeight = this.LOCATION_ROW_HEIGHT; // preserve group spacing
+        // Internal spacing between the three sub-rows: use square height plus a small gap
+        const GAP_BETWEEN_ROWS = 15; // 15px gap between square rows
+        const subRowHeight = this.SQUARE_HEIGHT + GAP_BETWEEN_ROWS;
+
         if (firstForecast) {
             this.drawTimeLabels(ctx, firstForecast);
-            this.drawMidnightLines(ctx, firstForecast);
+            // pass both the configured group height and the internal sub-row height so dividers align to squares
+            this.drawMidnightLines(ctx, firstForecast, locationsCount, this.LOCATION_ROW_HEIGHT, subRowHeight);
         }
 
-        // Draw each location
+        // Draw each location using original group heights but tighter sub-row spacing
         for (let i = 0; i < config.locations.length; i++) {
             const forecast = forecasts[i];
             if (forecast) {
-                const yOffset = this.TOP_MARGIN + i * this.LOCATION_ROW_HEIGHT;
-                this.drawLocation(ctx, config.locations[i], forecast, yOffset);
+                const yOffset = this.TOP_MARGIN + i * locationRowHeight;
+                this.drawLocation(ctx, config.locations[i], forecast, yOffset, locationRowHeight, subRowHeight);
             }
         }
 
@@ -136,7 +147,8 @@ export class SkyConditionsImage {
         
         // Center the title
         const titleX = this.IMAGE_WIDTH / 2 - (title.length * 12);
-        ctx.fillText(title, titleX, 40);
+        const titleY = this.TOP_MARGIN - 120; // move title down so it's not clipped
+        ctx.fillText(title, titleX, titleY);
         this.logger.verbose(`  Title position: (${titleX}, 40)`);
     }
 
@@ -154,67 +166,89 @@ export class SkyConditionsImage {
         const startTime = moment.tz(forecast.UTCStartTime, "UTC");
         this.logger.verbose(`Forecast start time: ${startTime.format('YYYY-MM-DD HH:mm')} UTC`);
 
-        // Draw time label every 12 hours (6 squares)
+        // Draw day-of-week labels centered over each 24-hour day block.
         let labelCount = 0;
+        const prevAlign = ctx.textAlign || 'start';
+        const prevBaseline = ctx.textBaseline || 'alphabetic';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        // Find day-start indices (midnight) and compute center of each day block
+        const dayStartIndices: number[] = [];
         for (let i = 0; i < this.NUM_SQUARES; i++) {
-            if (i % 6 === 0) { // Every 12 hours
-                const timeForSquare = startTime.clone().add(i * this.TIME_INTERVAL, "hours");
-                const label = timeForSquare.hour() === 0 ? "12AM" : "12PM";
-                const x = this.LEFT_MARGIN + i * this.SQUARE_WITH_BORDER;
-                ctx.fillText(label, x, this.TOP_MARGIN - 10);
-                labelCount++;
-            }
+            const t = startTime.clone().add(i * this.TIME_INTERVAL, 'hours');
+            if (t.hour() === 0) dayStartIndices.push(i);
         }
-        this.logger.verbose(`  Drew ${labelCount} time labels`);
+        // If the first dayStart isn't at 0, include 0 as start
+        if (dayStartIndices.length === 0 || dayStartIndices[0] !== 0) {
+            dayStartIndices.unshift(0);
+        }
+        for (let idx = 0; idx < dayStartIndices.length; idx++) {
+            const startIdx = dayStartIndices[idx];
+            // place label at noon (12 hours after start)
+            const noonIdx = Math.min(startIdx + 12, this.NUM_SQUARES - 1);
+            const dayLabelTime = startTime.clone().add(noonIdx * this.TIME_INTERVAL, 'hours');
+            const dayLabel = dayLabelTime.format('dddd');
+            const x = this.LEFT_MARGIN + noonIdx * this.SQUARE_WITH_BORDER + this.SQUARE_WIDTH / 2;
+            const labelY = this.TOP_MARGIN - 12;
+            ctx.fillText(dayLabel, x, labelY);
+            labelCount++;
+        }
+        ctx.textAlign = prevAlign as any;
+        ctx.textBaseline = prevBaseline as any;
+        this.logger.verbose(`  Drew ${labelCount} day labels`);
     }
 
-    private drawMidnightLines(ctx: any, forecast: AstrosphericResponse): void {
+    private drawMidnightLines(ctx: any, forecast: AstrosphericResponse, locationsCount: number, locationRowHeight: number, subRowHeight: number): void {
         this.logger.verbose("Drawing midnight grid lines");
         
         if (!forecast || !forecast.RDPS_CloudCover || forecast.RDPS_CloudCover.length === 0) {
             return;
         }
-
-        const startTime = moment.tz(forecast.UTCStartTime, "UTC");
-        let lineCount = 0;
-
+        // Draw vertical day dividers for each location block only (not between locations)
         ctx.strokeStyle = this.GRID_COLOR;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 3; // 3x thicker than original
 
         for (let i = 0; i < this.NUM_SQUARES; i++) {
             const hourIndex = i * this.TIME_INTERVAL;
-            
-            // Check if this hour is midnight (hour 0)
+            // Check if this hour is midnight (hour 0) and not the very first
             if (hourIndex > 0 && hourIndex % 24 === 0) {
                 const x = this.LEFT_MARGIN + i * this.SQUARE_WITH_BORDER;
-                ctx.beginPath();
-                ctx.moveTo(x, this.TOP_MARGIN);
-                ctx.lineTo(x, this.IMAGE_HEIGHT - 20);
-                ctx.stroke();
-                lineCount++;
+                // draw segment for each configured location row
+                for (let loc = 0; loc < locationsCount; loc++) {
+                    // top of Sky Cover square (yOffset)
+                    const yOffset = this.TOP_MARGIN + loc * locationRowHeight;
+                    const yStart = yOffset; // top of Sky Cover square
+                    // bottom of Wind Speed square: yOffset + subRowHeight*2 + SQUARE_HEIGHT
+                    const yEnd = yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT;
+                    ctx.beginPath();
+                    ctx.moveTo(x, yStart);
+                    ctx.lineTo(x, yEnd);
+                    ctx.stroke();
+                }
             }
         }
-        this.logger.verbose(`  Drew ${lineCount} midnight lines`);
     }
 
-    private drawLocation(ctx: any, location: Location, forecast: AstrosphericResponse, yOffset: number): void {
+    private drawLocation(ctx: any, location: Location, forecast: AstrosphericResponse, yOffset: number, locationRowHeight: number, subRowHeight: number): void {
         this.logger.info(`Drawing location: ${location.label} at yOffset=${yOffset}`);
 
-        // Draw location label above the rows
+        // Draw location label above the rows (larger, with more space below)
         ctx.fillStyle = this.TEXT_COLOR;
-        ctx.font = `48pt '${registeredFontName}'`;
-        ctx.fillText(location.label, this.LABEL_MARGIN, yOffset - 10);
-        this.logger.verbose(`  Location label: "${location.label}" at (${this.LABEL_MARGIN}, ${yOffset - 10})`);
+        ctx.font = `64pt '${registeredFontName}'`;
+        const labelY = yOffset - 60; // move label further above rows to give more space
+        ctx.fillText(location.label, this.LABEL_MARGIN, labelY);
+        this.logger.verbose(`  Location label: "${location.label}" at (${this.LABEL_MARGIN}, ${labelY})`);
+        // ensure subsequent labels align left
+        ctx.textAlign = 'left';
 
         // Draw labels for each data type (to the left of each row)
         ctx.font = `36pt '${registeredFontName}'`;
-        ctx.fillText("Sky Cover", this.LABEL_MARGIN, yOffset + this.SQUARE_SIZE / 2 + 5);
-        ctx.fillText("Seeing", this.LABEL_MARGIN, yOffset + this.SUB_ROW_HEIGHT + this.SQUARE_SIZE / 2 + 5);
-        ctx.fillText("Wind Speed", this.LABEL_MARGIN, yOffset + this.SUB_ROW_HEIGHT * 2 + this.SQUARE_SIZE / 2 + 5);
+        ctx.fillText("Sky Cover", this.LABEL_MARGIN, yOffset + this.SQUARE_HEIGHT / 2 + 5);
+        ctx.fillText("Seeing", this.LABEL_MARGIN, yOffset + subRowHeight + this.SQUARE_HEIGHT / 2 + 5);
+        ctx.fillText("Wind Speed", this.LABEL_MARGIN, yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT / 2 + 5);
         this.logger.verbose(`  Row labels drawn`);
 
         // Get current time in this location's timezone
-        const startTime = moment.tz(forecast.UTCStartTime, "UTC");
         const currentTime = moment.tz(location.timezone);
         this.logger.verbose(`  Current time in ${location.timezone}: ${currentTime.format('YYYY-MM-DD HH:mm')}`);
 
@@ -228,7 +262,7 @@ export class SkyConditionsImage {
             const cloudPercent = cloudData?.Value?.ActualValue ?? null;
             if (cloudPercent !== null) {
                 ctx.fillStyle = this.getCloudCoverColor(cloudPercent);
-                ctx.fillRect(x, yOffset, this.SQUARE_SIZE, this.SQUARE_SIZE);
+                ctx.fillRect(x, yOffset, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
                 
                 if (i < 3) {
                     this.logger.verbose(`  Cloud[${i}]=${cloudPercent.toFixed(1)}%`);
@@ -240,7 +274,7 @@ export class SkyConditionsImage {
             const seeingValue = seeingData?.Value?.ActualValue ?? null;
             if (seeingValue !== null) {
                 ctx.fillStyle = this.getSeeingColor(seeingValue);
-                ctx.fillRect(x, yOffset + this.SUB_ROW_HEIGHT, this.SQUARE_SIZE, this.SQUARE_SIZE);
+                ctx.fillRect(x, yOffset + subRowHeight, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
                 
                 if (i < 3) {
                     this.logger.verbose(`  Seeing[${i}]=${seeingValue.toFixed(1)}`);
@@ -253,7 +287,7 @@ export class SkyConditionsImage {
             if (windMs !== null) {
                 const windMph = windMs * 2.237; // Convert m/s to mph
                 ctx.fillStyle = this.getWindSpeedColor(windMph);
-                ctx.fillRect(x, yOffset + this.SUB_ROW_HEIGHT * 2, this.SQUARE_SIZE, this.SQUARE_SIZE);
+                ctx.fillRect(x, yOffset + subRowHeight * 2, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
                 
                 if (i < 3) {
                     this.logger.verbose(`  Wind[${i}]=${windMs.toFixed(1)}m/s (${windMph.toFixed(1)}mph)`);
@@ -261,30 +295,8 @@ export class SkyConditionsImage {
             }
         }
 
-        // Draw current time line
-        this.drawCurrentTimeLine(ctx, forecast, currentTime, yOffset);
-    }
-
-    private drawCurrentTimeLine(ctx: any, forecast: AstrosphericResponse, currentTime: moment.Moment, yOffset: number): void {
-        const startTime = moment.tz(forecast.UTCStartTime, "UTC");
-        const hoursFromStart = currentTime.diff(startTime, "hours", true);
-        
-        this.logger.verbose(`  Hours from forecast start: ${hoursFromStart.toFixed(2)}`);
-
-        if (hoursFromStart >= 0 && hoursFromStart <= this.NUM_SQUARES * this.TIME_INTERVAL) {
-            const squarePosition = hoursFromStart / this.TIME_INTERVAL;
-            const x = this.LEFT_MARGIN + squarePosition * this.SQUARE_WITH_BORDER;
-            
-            ctx.strokeStyle = this.CURRENT_TIME_COLOR;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(x, yOffset);
-            ctx.lineTo(x, yOffset + this.LOCATION_ROW_HEIGHT - 40);
-            ctx.stroke();
-            
-            this.logger.verbose(`  Current time line drawn at x=${x.toFixed(1)}`);
-        }
-    }
+        // current time line removed by request
+     }
 
     private getCloudCoverColor(cloudPercent: number): string {
         // Inverted scale: 0% = best (dark blue), higher % = worse (white)
@@ -317,7 +329,6 @@ export class SkyConditionsImage {
     private async encodeJPEG(image: any): Promise<Buffer> {
         return new Promise((resolve, reject) => {
             const chunks: Buffer[] = [];
-            const { Writable } = require("stream");
             
             const writeStream = new Writable({
                 write(chunk: Buffer, encoding: string, callback: () => void) {
