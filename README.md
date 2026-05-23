@@ -1,6 +1,12 @@
-# sky-conditions-builder
+# Sky Conditions Builder
 
-A TypeScript module for building astrophotography sky conditions images from Astrospheric data. Generates a 1920x1080 image showing cloud cover, atmospheric seeing, and wind speed forecasts for up to 3 locations.
+This tool generates a compact sky conditions image and per-location CSV forecast exports using Astrospheric forecast data. It supports dependency injection for logging, caching, and image writing so you can swap implementations for testing or production.
+
+Key points
+
+- The generator always shows a 72-hour timeline aligned to the earliest local midnight across configured locations.
+- Forecast CSV files are generated per-location and are now written via the injected ImageWriter (if provided). Fallback to disk is used if no writer is injected.
+- The project uses a pluggable on-disk cache implementation (`Kache`) compatible with the weather-builder project.
 
 ## Features
 
@@ -116,7 +122,8 @@ run();
 
 ### Config Object
 
-```typescript // Your Astrospheric API key
+```typescript
+// Your Astrospheric API key
     baseURL?: string;       // Optional: API base URL (default: https://astrosphericpublicaccess.azurewebsites.net/api/)
     outputFilename?: string; // Optional: output filename (for documentation purposes)
     locations: Location[];  // Array of 1-3 locations

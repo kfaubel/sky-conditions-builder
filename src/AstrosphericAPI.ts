@@ -1,6 +1,10 @@
 import axios, { AxiosError } from "axios";
-import { Logger } from "./Logger";
+import * as fs from 'fs';
+import * as moment from 'moment-timezone';
+import { LoggerInterface } from "./Logger";
 import { AstrosphericResponse } from "./types";
+import type { KacheInterface } from "./Kache";
+import type { ImageWriterInterface } from "./SimpleImageWriter";
 
 interface CacheEntry {
     data: AstrosphericResponse;
@@ -8,18 +12,23 @@ interface CacheEntry {
 }
 
 export class AstrosphericAPI {
-    private logger: Logger;
+    private logger: LoggerInterface;
     private apiKey: string;
     private endpoint: string;
-    private cache: Map<string, CacheEntry>;
+    // Optional disk-backed cache (Kache) — if not provided we may use in-memory map for short-lived caching
+    private kache?: KacheInterface | null;
+    private cache: Map<string, CacheEntry> | null;
+    private imageWriter?: ImageWriterInterface | null;
     private cacheDurationMs: number;
 
-    constructor(logger: Logger, apiKey: string, baseURL?: string, cacheDurationMinutes?: number) {
+    constructor(logger: LoggerInterface, apiKey: string, baseURL?: string, cacheDurationMinutes?: number, kache?: KacheInterface | null, imageWriter?: ImageWriterInterface | null) {
         this.logger = logger;
         this.apiKey = apiKey;
         const base = baseURL || "https://astrosphericpublicaccess.azurewebsites.net/api/";
         this.endpoint = base + "GetForecastData_V1";
-        this.cache = new Map();
+        this.kache = kache ?? null;
+        this.cache = (this.kache ? null : new Map());
+        this.imageWriter = imageWriter ?? null;
         this.cacheDurationMs = (cacheDurationMinutes || 0) * 60 * 1000;
         
         if (cacheDurationMinutes && cacheDurationMinutes > 0) {
@@ -27,20 +36,83 @@ export class AstrosphericAPI {
         }
     }
 
+    // Write a CSV file containing UTC/local timestamps and the primary forecast values for
+    // cloud cover, seeing and wind speed. Filename is derived from the cacheKey for clarity.
+    private writeForecastCSV(cacheKey: string, data: AstrosphericResponse): void {
+        try {
+            const safeKey = cacheKey.replace(/[^0-9a-zA-Z._-]/g, '_');
+            const filename = `forecast-${safeKey}.csv`;
+            const startUTC = moment.tz(data.UTCStartTime, 'UTC');
+            const tz = data.TimeZone || 'UTC';
+            const cloud = data.RDPS_CloudCover || [];
+            const seeing = data.Astrospheric_Seeing || [];
+            const wind = data.RDPS_WindVelocity || [];
+            const maxLen = Math.max(cloud.length, seeing.length, wind.length);
+
+            const lines: string[] = [];
+            lines.push('UTC_Date,UTC_Time,Local_Date,Local_Time,CloudPercent,SeeingValue,Wind_m_s,Source');
+            const source = (data as any)._source || '';
+            for (let i = 0; i < maxLen; i++) {
+                const t = startUTC.clone().add(i, 'hours');
+                const local = t.clone().tz(tz);
+                const cloudVal = cloud[i]?.Value?.ActualValue ?? '';
+                const seeingVal = seeing[i]?.Value?.ActualValue ?? '';
+                const windVal = wind[i]?.Value?.ActualValue ?? '';
+                const utcDate = t.format('YYYY-MM-DD');
+                const utcTime = t.format('HH:mm');
+                const localDate = local.format('YYYY-MM-DD');
+                const localTime = local.format('HH:mm');
+                lines.push(`${utcDate},${utcTime},${localDate},${localTime},${cloudVal},${seeingVal},${windVal},${source}`);
+            }
+
+            const content = lines.join('\n');
+            if (this.imageWriter) {
+                try {
+                    this.imageWriter.saveFile(filename, Buffer.from(content, 'utf8'));
+                    this.logger.verbose(`Wrote forecast CSV via ImageWriter: ${filename}`);
+                } catch (e) {
+                    this.logger.error(`ImageWriter failed to write CSV ${filename}: ${e}`);
+                    fs.writeFileSync(filename, content, 'utf8');
+                    this.logger.verbose(`Wrote forecast CSV fallback: ${filename}`);
+                }
+            } else {
+                fs.writeFileSync(filename, content, 'utf8');
+                this.logger.verbose(`Wrote forecast CSV: ${filename}`);
+            }
+        } catch (err) {
+            this.logger.error(`Failed to write forecast CSV for ${cacheKey}: ${err}`);
+        }
+    }
+
     async getForecast(latitude: number, longitude: number): Promise<AstrosphericResponse> {
         // Check cache first
         const cacheKey = `${latitude.toFixed(2)},${longitude.toFixed(2)}`;
         
-        if (this.cacheDurationMs > 0) {
+        // If a disk-backed Kache is provided, consult it first
+        if (this.kache) {
+            try {
+                const cached = this.kache.get(cacheKey) as AstrosphericResponse | null;
+                if (cached) {
+                    if ((cached as any)._source === undefined) (cached as any)._source = 'cached';
+                    this.writeForecastCSV(cacheKey, cached);
+                    this.logger.verbose(`Using Kache for forecast ${cacheKey}`);
+                    return cached;
+                }
+            } catch (e) {
+                this.logger.verbose(`Kache read error for ${cacheKey}: ${e}`);
+            }
+        } else if (this.cache && this.cacheDurationMs > 0) {
             const cached = this.cache.get(cacheKey);
             if (cached) {
                 const age = Date.now() - cached.timestamp;
                 if (age < this.cacheDurationMs) {
                     const ageMinutes = Math.floor(age / 60000);
-                    this.logger.verbose(`Using cached forecast for ${cacheKey} (age: ${ageMinutes} minutes)`);
+                    if ((cached.data as any)._source === undefined) (cached.data as any)._source = 'cached';
+                    this.logger.verbose(`Using in-memory cached forecast for ${cacheKey} (age: ${ageMinutes} minutes)`);
+                    this.writeForecastCSV(cacheKey, cached.data);
                     return cached.data;
                 } else {
-                    this.logger.verbose(`Cache expired for ${cacheKey}`);
+                    this.logger.verbose(`In-memory cache expired for ${cacheKey}`);
                     this.cache.delete(cacheKey);
                 }
             }
@@ -65,13 +137,22 @@ export class AstrosphericAPI {
             if (response.status === 200) {
                 this.logger.verbose(`Successfully fetched forecast. API Credits used: ${response.data.APICreditUsedToday}`);
                 
-                // Cache the result
-                if (this.cacheDurationMs > 0) {
-                    this.cache.set(cacheKey, {
-                        data: response.data,
-                        timestamp: Date.now()
-                    });
-                    this.logger.verbose(`Cached forecast for ${cacheKey}`);
+                if (response && response.data) (response.data as any)._source = 'api';
+                // write CSV for API-fetched data
+                this.writeForecastCSV(cacheKey, response.data);
+
+                // Cache the result using provided kache or in-memory map
+                if (this.kache && this.cacheDurationMs > 0) {
+                    try {
+                        const expirationTime = Date.now() + this.cacheDurationMs;
+                        this.kache.set(cacheKey, response.data, expirationTime);
+                        this.logger.verbose(`Kache: Cached forecast for ${cacheKey}`);
+                    } catch (e) {
+                        this.logger.verbose(`Kache set error for ${cacheKey}: ${e}`);
+                    }
+                } else if (this.cache && this.cacheDurationMs > 0) {
+                    this.cache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+                    this.logger.verbose(`In-memory: Cached forecast for ${cacheKey}`);
                 }
                 
                 return response.data;

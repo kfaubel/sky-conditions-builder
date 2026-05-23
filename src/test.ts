@@ -1,10 +1,10 @@
-// Sample usage of sky-conditions-builder
+// Test runner for sky-conditions-builder (moved from project root sample.ts)
 import fs from 'fs';
-import { SkyConditionsImage, Logger } from './src/index.js';
-import { AstrosphericAPI } from './src/AstrosphericAPI.js';
-import { Kache } from './src/Kache.js';
-import { SimpleImageWriter } from './src/SimpleImageWriter.js';
-import type { SkyConditionsConfig, AstrosphericResponse } from './src/types.js';
+import { SkyConditionsImage, Logger } from './index';
+import { AstrosphericAPI } from './AstrosphericAPI';
+import { Kache } from './Kache';
+import { SimpleImageWriter } from './SimpleImageWriter';
+import type { SkyConditionsConfig, AstrosphericResponse } from './types';
 
 // Create a structured logger and helpers (Kache + SimpleImageWriter)
 const logger = new Logger('sample', 'info');
@@ -71,7 +71,6 @@ async function run() {
                     logger.info(`[Mock] Loading data from ${filename}`);
                     const data = JSON.parse(fs.readFileSync(filename, 'utf8')) as AstrosphericResponse;
 
-                    // Ensure mock arrays cover the full display window by repeating the last hour where needed.
                     if ((data as any).RDPS_CloudCover) (data as any).RDPS_CloudCover = extendArray((data as any).RDPS_CloudCover) as any;
                     if ((data as any).Astrospheric_Seeing) (data as any).Astrospheric_Seeing = extendArray((data as any).Astrospheric_Seeing) as any;
                     if ((data as any).RDPS_WindVelocity) (data as any).RDPS_WindVelocity = extendArray((data as any).RDPS_WindVelocity) as any;

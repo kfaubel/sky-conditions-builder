@@ -8,11 +8,12 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch",
-    "start": "npm run build && node sample.js",
-    "lint": "eslint src/**/*.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run clean && tsc",
+    "clean": "shx rm -rf build",
+    "test": "npm run build && node app.js",
+    "start": "npm run build && node app.js",
+    "prepare": "npm run build",
+    "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
     "axios": "^1.7.2",
@@ -24,7 +25,8 @@
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
     "eslint": "^8.57.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "shx": "^0.3.4"
   },
   "keywords": [
     "astrophotography",
@@ -34,6 +36,6 @@
     "astrospheric"
   ],
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   }
 }
