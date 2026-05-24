@@ -7,10 +7,10 @@ export interface Location {
 
 export interface SkyConditionsConfig {
     apiKey: string;
-    title?: string;
-    baseURL?: string;
-    outputFilename?: string;
-    cacheDurationMinutes?: number;
+    title: string;
+    baseURL: string;
+    outputFilename: string;
+    cacheDurationMinutes: number;
     locations: Location[];
 }
 

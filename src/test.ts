@@ -90,7 +90,7 @@ async function run() {
 
     try {
         logger.info('Fetching sky conditions data...');
-        const result = await skyImage.getImageStream(config);
+        const result = await skyImage.getImage(config.title, config.apiKey, config.baseURL, config.cacheDurationMinutes, config.locations, config.outputFilename);
 
         if (result !== null && result.jpegImg !== null) {
             // If an injected writer was used, it has already saved the image. Otherwise, write a fallback file.

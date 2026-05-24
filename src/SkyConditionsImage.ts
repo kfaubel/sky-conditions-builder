@@ -3,7 +3,7 @@ import * as moment from "moment-timezone";
 import * as fs from "fs";
 import { Writable } from "stream";
 import { LoggerInterface } from "./Logger";
-import { SkyConditionsConfig, Location, ImageResult, AstrosphericResponse } from "./types";
+import { Location, ImageResult, AstrosphericResponse } from "./types";
 import { AstrosphericAPI } from "./AstrosphericAPI";
 import type { ImageWriterInterface } from "./SimpleImageWriter";
 import type { KacheInterface } from "./Kache";
@@ -77,7 +77,8 @@ export class SkyConditionsImage {
         this.logger.info("SkyConditionsImage initialized");
     }
 
-    async getImageStream(config: SkyConditionsConfig): Promise<ImageResult> {
+    //async getImageStream(config: SkyConditionsConfig): Promise<ImageResult> {
+    public async getImage(title: string, apiKey: string, baseURL: string, cacheDurationMinutes: number, locations: Location[], outputFilename: string ): Promise<ImageResult | null> {
         this.logger.info("Starting sky conditions image generation");
         this.logger.verbose(`Font registration status: ${registeredFont !== null}, Font name: ${registeredFontName}`);
         
@@ -90,15 +91,15 @@ export class SkyConditionsImage {
         ctx.fillRect(0, 0, this.IMAGE_WIDTH, this.IMAGE_HEIGHT);
 
         // Draw title if provided
-        if (config.title) {
-            this.drawTitle(ctx, config.title);
+        if (title) {
+            this.drawTitle(ctx, title);
         }
 
         // Fetch data for all locations using injected kache if provided
-        const api = new AstrosphericAPI(this.logger, config.apiKey, config.baseURL, config.cacheDurationMinutes, this.kache ?? null, this.imageWriter ?? null);
+        const api = new AstrosphericAPI(this.logger, apiKey, baseURL, cacheDurationMinutes, this.kache ?? null, this.imageWriter ?? null);
         const forecasts: (AstrosphericResponse | null)[] = [];
 
-        for (const location of config.locations) {
+        for (const location of locations) {
             try {
                 this.logger.info(`Fetching forecast for ${location.label} (${location.latitude}, ${location.longitude})`);
                 const forecast = await api.getForecast(location.latitude, location.longitude);
@@ -120,7 +121,7 @@ export class SkyConditionsImage {
         // Use that as the shared UTC start so the display always shows exactly three days (72 hours)
         // anchored to the earliest local day. This allows locations in later zones to show leading blanks.
         let earliestLocalMidnight: moment.Moment | null = null;
-        for (const loc of config.locations) {
+        for (const loc of locations) {
             try {
                 const lm = moment.tz(loc.timezone).startOf('day');
                 if (!earliestLocalMidnight || lm.isBefore(earliestLocalMidnight)) earliestLocalMidnight = lm;
@@ -134,14 +135,14 @@ export class SkyConditionsImage {
         const globalStartUTC = earliestLocalMidnight.clone().tz('UTC');
 
         // Draw each location using the shared global timeline so columns line up across locations
-        for (let i = 0; i < config.locations.length; i++) {
+        for (let i = 0; i < locations.length; i++) {
             const forecast = forecasts[i];
             if (forecast) {
                 const yOffset = this.TOP_MARGIN + i * locationRowHeight;
                 // Draw day labels and midnight dividers anchored to the shared global timeline
-                this.drawTimeLabelsForLocation(ctx, forecast, config.locations[i], yOffset, globalStartUTC);
-                this.drawMidnightLinesForLocation(ctx, forecast, config.locations[i], yOffset, locationRowHeight, subRowHeight, globalStartUTC);
-                this.drawLocation(ctx, config.locations[i], forecast, yOffset, locationRowHeight, subRowHeight, globalStartUTC);
+                this.drawTimeLabelsForLocation(ctx, forecast, locations[i], yOffset, globalStartUTC);
+                this.drawMidnightLinesForLocation(ctx, forecast, locations[i], yOffset, locationRowHeight, subRowHeight, globalStartUTC);
+                this.drawLocation(ctx, locations[i], forecast, yOffset, locationRowHeight, subRowHeight, globalStartUTC);
             }
         }
 
@@ -150,10 +151,10 @@ export class SkyConditionsImage {
         const jpegData = await this.encodeJPEG(img);
 
         // If an ImageWriter is injected, use it to save the file using config.outputFilename
-        if (this.imageWriter && config.outputFilename) {
+        if (this.imageWriter && outputFilename) {
             try {
-                this.imageWriter.saveFile(config.outputFilename, jpegData);
-                this.logger.info(`Saved image using injected ImageWriter: ${config.outputFilename}`);
+                this.imageWriter.saveFile(outputFilename, jpegData);
+                this.logger.info(`Saved image using injected ImageWriter: ${outputFilename}`);
             } catch (err) {
                 this.logger.error(`Failed to save image via ImageWriter: ${err}`);
             }
