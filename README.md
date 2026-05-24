@@ -123,7 +123,8 @@ run();
 ### Config Object
 
 ```typescript
-// Your Astrospheric API key
+interface Config {
+    apiKey: string;         // Your Astrospheric API key
     baseURL?: string;       // Optional: API base URL (default: https://astrosphericpublicaccess.azurewebsites.net/api/)
     outputFilename?: string; // Optional: output filename (for documentation purposes)
     locations: Location[];  // Array of 1-3 locations
@@ -133,9 +134,7 @@ interface Location {
     label: string;      // Display name (e.g., "Onset, MA")
     latitude: number;   // Latitude in decimal degrees
     longitude: number;  // Longitude in decimal degrees
-    tatitude: number;   // Latitude in decimal degrees
-    Longitude: number;  // Longitude in decimal degrees
-    Timezone: string;   // IANA timezone (e.g., "America/New_York")
+    timezone: string;   // IANA timezone (e.g., "America/New_York")
 }
 ```
 
@@ -219,6 +218,27 @@ node generate-mock-data.js
 ```
 
 See [MOCK-DATA-README.md](MOCK-DATA-README.md) for complete documentation on mock data development workflow.
+
+## Publishing to NPM
+
+To publish this package to the NPM registry, follow these steps:
+
+1. **Ensure you are logged in to NPM:**
+   ```bash
+   npm login
+   ```
+2. **Build the project:** Make sure the latest TypeScript code is compiled.
+   ```bash
+   npm run build
+   ```
+3. **Update the version:** Increment the package version (e.g., patch, minor, or major).
+   ```bash
+   npm version patch
+   ```
+4. **Publish the package:**
+   ```bash
+   npm publish
+   ```
 
 ## License
 

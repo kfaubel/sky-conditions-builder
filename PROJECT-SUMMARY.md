@@ -78,10 +78,10 @@ const config = {
     apiKey: "your_api_key_here",
     locations: [
         {
-            Label: "Onset, MA",
-            Latitude: 41.75,
-            Longitude: -70.644,
-            Timezone: "America/New_York"
+            label: "Onset, MA",
+            latitude: 41.75,
+            longitude: -70.644,
+            timezone: "America/New_York"
         }
     ]
 };
