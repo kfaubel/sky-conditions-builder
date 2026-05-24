@@ -6,7 +6,7 @@ import { ImageWriterInterface } from "./SimpleImageWriter";
 import { SkyConditionsImage } from "./SkyConditionsImage";
 import { SkyConditionsConfig } from "./types";
 
-export class SkyBuilder {
+export class SkyConditionsBuilder {
     private logger: LoggerInterface;
     private cache: KacheInterface;
     private writer: ImageWriterInterface;
