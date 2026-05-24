@@ -17,12 +17,12 @@ export class SkyConditionsBuilder {
         this.writer = writer;
     }
 
-    public async CreateImage(config: SkyConditionsConfig): Promise<boolean>{
+    public async createImage(config: SkyConditionsConfig): Promise<boolean>{
         try {
             const skyConditionsImage: SkyConditionsImage = new SkyConditionsImage(this.logger, this.writer, this.cache);
 
             const result = await skyConditionsImage.getImage(config.title, config.apiKey, config.baseURL, config.cacheDurationMinutes, config.locations, config.outputFilename);
-            
+
             if (result !== null) {
                 this.logger.info(`WeatherBuilder: Writing: ${config.outputFilename}`);
                 // Ensure we pass a Buffer to saveFile; ImageResult (e.g. from jpeg-js) has a .data (Uint8Array)
@@ -37,9 +37,9 @@ export class SkyConditionsBuilder {
                     // Fallback: stringify any other result to UTF-8
                     bufToSave = Buffer.from(String(result), 'utf8');
                 }
-                this.writer.saveFile(config.outputFilename, bufToSave);
+                this.writer.saveFile(config.outputFilename || "sky-conditions.jpg", bufToSave);
             } else {
-                this.logger.warn(`WeatherBuilder: No image for ${config.outputFilename}`);
+                this.logger.warn(`WeatherBuilder: No image for ${config.outputFilename || "sky-conditions.jpg"}`);
                 return false;
             }
         } catch (e) {
