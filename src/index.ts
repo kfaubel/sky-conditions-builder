@@ -1,5 +1,5 @@
 export { SkyConditionsImage } from "./SkyConditionsImage";
-export { SkyConditionsImage as SkyConditionsBuilder } from "./SkyConditionsImage";
+export { SkyConditionsBuilder } from "./SkyConditionsBuilder";
 export { Logger } from "./Logger";
 export { ImageWriterInterface, SimpleImageWriter } from "./SimpleImageWriter";
 export { Kache } from "./Kache";
