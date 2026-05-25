@@ -1,5 +1,4 @@
 node_modules/
-*.js
 *.d.ts
 *.js.map
 *.d.ts.map
@@ -18,3 +17,5 @@ config.json
 !sample-with-mocks.js
 !generate-mock-data.js
 !mock-data-*.json
+*.csv
+astrospheric-cache.json
