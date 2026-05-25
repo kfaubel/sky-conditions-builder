@@ -244,8 +244,6 @@ export class SkyConditionsImage {
         ctx.strokeStyle = '#BBBBBB';
         ctx.lineWidth = 6;
 
-        const forecastStartUTC = moment.tz(forecast.UTCStartTime, 'UTC');
-
         // yStart should reach into label area where day labels live (labelY ~ yOffset - 20)
         const labelTop = yOffset - 36;
         const yStart = Math.max(40, labelTop); // don't go above title area
@@ -255,17 +253,6 @@ export class SkyConditionsImage {
             const tUTC = globalStartUTC.clone().add(i, 'hours');
             const local = tUTC.clone().tz(location.timezone);
             if (local.hour() === 0 && i > 0) {
-                // check for any forecast data in this 24-hour block
-                const forecastIndex = tUTC.diff(forecastStartUTC, 'hours');
-                let hasData = false;
-                const nowForLocationUTC = moment.tz(location.timezone).utc();
-                for (let k = 0; k < 24; k++) {
-                    const idx = forecastIndex + k;
-                    const hourUTC = tUTC.clone().add(k, 'hours');
-                    if (idx >= 0 && idx < forecast.RDPS_CloudCover.length && hourUTC.isSameOrAfter(nowForLocationUTC)) { hasData = true; break; }
-                }
-                if (!hasData) continue;
-
                 const x = this.LEFT_MARGIN + i * this.SQUARE_WITH_BORDER;
                 ctx.beginPath();
                 ctx.moveTo(x, yStart);
