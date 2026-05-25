@@ -199,7 +199,7 @@ const config = {
 };
 ```
 
-- **When enabled**: API responses are cached in-memory by location coordinates
+- **When enabled**: API responses are cached via the configured `Kache` implementation
 - **When to use**: During development or when generating images frequently
 - **Benefits**: Reduces API credit consumption, faster generation, avoids rate limits
 - **Cache lifetime**: Specified in minutes (e.g., 1440 = 24 hours)

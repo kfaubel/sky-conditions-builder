@@ -6,18 +6,12 @@ import { AstrosphericResponse } from "./types";
 import type { KacheInterface } from "./Kache";
 import type { ImageWriterInterface } from "./SimpleImageWriter";
 
-interface CacheEntry {
-    data: AstrosphericResponse;
-    timestamp: number;
-}
-
 export class AstrosphericAPI {
     private logger: LoggerInterface;
     private apiKey: string;
     private endpoint: string;
-    // Optional disk-backed cache (Kache) — if not provided we may use in-memory map for short-lived caching
+    // Optional disk-backed cache (Kache)
     private kache?: KacheInterface | null;
-    private cache: Map<string, CacheEntry> | null;
     private imageWriter?: ImageWriterInterface | null;
     private cacheDurationMs: number;
 
@@ -27,7 +21,6 @@ export class AstrosphericAPI {
         const base = baseURL || "https://astrosphericpublicaccess.azurewebsites.net/api/";
         this.endpoint = base + "GetForecastData_V1";
         this.kache = kache ?? null;
-        this.cache = (this.kache ? null : new Map());
         this.imageWriter = imageWriter ?? null;
         this.cacheDurationMs = (cacheDurationMinutes || 0) * 60 * 1000;
         
@@ -95,26 +88,11 @@ export class AstrosphericAPI {
                 if (cached) {
                     if ((cached as any)._source === undefined) (cached as any)._source = 'cached';
                     this.writeForecastCSV(cacheKey, cached);
-                    this.logger.verbose(`Using Kache for forecast ${cacheKey}`);
+                    this.logger.info(`Using cached value from Kache for sky conditions ${cacheKey}`);
                     return cached;
                 }
             } catch (e) {
                 this.logger.verbose(`Kache read error for ${cacheKey}: ${e}`);
-            }
-        } else if (this.cache && this.cacheDurationMs > 0) {
-            const cached = this.cache.get(cacheKey);
-            if (cached) {
-                const age = Date.now() - cached.timestamp;
-                if (age < this.cacheDurationMs) {
-                    const ageMinutes = Math.floor(age / 60000);
-                    if ((cached.data as any)._source === undefined) (cached.data as any)._source = 'cached';
-                    this.logger.verbose(`Using in-memory cached forecast for ${cacheKey} (age: ${ageMinutes} minutes)`);
-                    this.writeForecastCSV(cacheKey, cached.data);
-                    return cached.data;
-                } else {
-                    this.logger.verbose(`In-memory cache expired for ${cacheKey}`);
-                    this.cache.delete(cacheKey);
-                }
             }
         }
 
@@ -125,7 +103,7 @@ export class AstrosphericAPI {
                 APIKey: this.apiKey,
             };
 
-            this.logger.verbose(`Fetching forecast from API for lat: ${latitude}, lon: ${longitude}`);
+            this.logger.info(`No cached value found for ${cacheKey}. Fetching forecast from API.`);
 
             const response = await axios.post<AstrosphericResponse>(this.endpoint, requestData, {
                 headers: {
@@ -141,18 +119,15 @@ export class AstrosphericAPI {
                 // write CSV for API-fetched data
                 this.writeForecastCSV(cacheKey, response.data);
 
-                // Cache the result using provided kache or in-memory map
+                // Cache the result using provided kache
                 if (this.kache && this.cacheDurationMs > 0) {
                     try {
                         const expirationTime = Date.now() + this.cacheDurationMs;
                         this.kache.set(cacheKey, response.data, expirationTime);
-                        this.logger.verbose(`Kache: Cached forecast for ${cacheKey}`);
+                        this.logger.info(`Kache: Adding  ${cacheKey} to cache with expiration in ${this.cacheDurationMs / 60000} minutes`);
                     } catch (e) {
-                        this.logger.verbose(`Kache set error for ${cacheKey}: ${e}`);
+                        this.logger.error(`Kache set error for ${cacheKey}: ${e}`);
                     }
-                } else if (this.cache && this.cacheDurationMs > 0) {
-                    this.cache.set(cacheKey, { data: response.data, timestamp: Date.now() });
-                    this.logger.verbose(`In-memory: Cached forecast for ${cacheKey}`);
                 }
                 
                 return response.data;

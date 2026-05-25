@@ -63,12 +63,12 @@ export class SkyConditionsImage {
     private readonly SQUARE_BORDER = 2;     // Border between squares
     private readonly SQUARE_WITH_BORDER = this.SQUARE_WIDTH + this.SQUARE_BORDER;
     
-    private readonly LOCATION_ROW_HEIGHT = 280;  // Height for each location's 3 sub-rows (slightly increased spacing)
+    private readonly LOCATION_ROW_HEIGHT = 290;  // Height for each location's 3 sub-rows (slightly increased spacing)
     private readonly SUB_ROW_HEIGHT = 80;        // Height for each data type row (increased spacing)
     
     private readonly TIME_INTERVAL = 1;     // Show every 1 hour
     private readonly NUM_SQUARES = 72;      // 72 hours / 1 hour
-    private readonly LABEL_MARGIN = 20;     // Left margin for labels (more room)
+    private readonly LABEL_MARGIN = 25;     // Left margin for labels (more room)
 
     constructor(logger: LoggerInterface, imageWriter?: ImageWriterInterface | null, kache?: KacheInterface | null) {
         this.logger = logger;
@@ -175,7 +175,7 @@ export class SkyConditionsImage {
         
         // Center the title
         const titleX = this.IMAGE_WIDTH / 2 - (title.length * 12);
-        const titleY = this.TOP_MARGIN - 120; // move title down so it's not clipped
+        const titleY = this.TOP_MARGIN - 150; // move title down so it's not clipped
         ctx.fillText(title, titleX, titleY);
         this.logger.verbose(`  Title position: (${titleX}, 40)`);
     }
@@ -280,7 +280,7 @@ export class SkyConditionsImage {
 
           // Draw location label above the rows (larger, with more space below)
           ctx.fillStyle = this.TEXT_COLOR;
-          ctx.font = `64pt '${registeredFontName}'`;
+          ctx.font = `56pt '${registeredFontName}'`;
           const labelY = yOffset - 60; // move label further above rows to give more space
           ctx.fillText(location.label, this.LABEL_MARGIN, labelY);
           this.logger.verbose(`  Location label: "${location.label}" at (${this.LABEL_MARGIN}, ${labelY})`);
@@ -288,12 +288,12 @@ export class SkyConditionsImage {
           ctx.textAlign = 'left';
 
           // Draw labels for each data type (to the left of each row)
-          ctx.font = `36pt '${registeredFontName}'`;
+          ctx.font = `30pt '${registeredFontName}'`;
           // Shift labels slightly right for spacing
-          const labelOffsetX = this.LABEL_MARGIN + 10;
-          ctx.fillText("Sky Cover", labelOffsetX, yOffset + this.SQUARE_HEIGHT / 2 + 5);
+          const labelOffsetX = this.LABEL_MARGIN + 20;
+          ctx.fillText("Clouds", labelOffsetX, yOffset + this.SQUARE_HEIGHT / 2 + 5);
           ctx.fillText("Seeing", labelOffsetX, yOffset + subRowHeight + this.SQUARE_HEIGHT / 2 + 5);
-          ctx.fillText("Wind Speed", labelOffsetX, yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT / 2 + 5);
+          ctx.fillText("Wind", labelOffsetX, yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT / 2 + 5);
           this.logger.verbose(`  Row labels drawn`);
 
          // Get current time in this location's timezone
