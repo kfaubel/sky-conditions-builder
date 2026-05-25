@@ -18,13 +18,14 @@ export class SkyConditionsBuilder {
     }
 
     public async createImage(config: SkyConditionsConfig): Promise<boolean>{
+        this.logger.info(`SkyConditionsBuilder: Creating image with config: ${JSON.stringify(config)}`);
         try {
             const skyConditionsImage: SkyConditionsImage = new SkyConditionsImage(this.logger, this.writer, this.cache);
 
             const result = await skyConditionsImage.getImage(config.title, config.apiKey, config.baseURL, config.cacheDurationMinutes, config.locations, config.outputFilename);
 
             if (result !== null) {
-                this.logger.info(`WeatherBuilder: Writing: ${config.outputFilename}`);
+                this.logger.info(`SkyConditionsBuilder: Writing: ${config.outputFilename}`);
                 // Ensure we pass a Buffer to saveFile; ImageResult (e.g. from jpeg-js) has a .data (Uint8Array)
                 let bufToSave: Buffer;
                 if (Buffer.isBuffer(result)) {
@@ -39,11 +40,11 @@ export class SkyConditionsBuilder {
                 }
                 this.writer.saveFile(config.outputFilename || "sky-conditions.jpg", bufToSave);
             } else {
-                this.logger.warn(`WeatherBuilder: No image for ${config.outputFilename || "sky-conditions.jpg"}`);
+                this.logger.warn(`SkyConditionsBuilder: No image for ${config.outputFilename || "sky-conditions.jpg"}`);
                 return false;
             }
         } catch (e) {
-            this.logger.error(`WeatherBuilder: Exception: ${e as Error} ${(e as Error).stack}`);
+            this.logger.error(`SkyConditionsBuilder: Exception: ${e as Error} ${(e as Error).stack}`);
             return false;
         }
 

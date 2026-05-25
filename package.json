@@ -1,6 +1,6 @@
 {
   "name": "sky-conditions-builder",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Builder module to create sky condition images for astrophotography",
   "license": "MIT",
   "author": "Ken Faubel",
