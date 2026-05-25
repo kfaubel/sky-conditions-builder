@@ -102,7 +102,7 @@ export class SkyConditionsImage {
         for (const location of locations) {
             try {
                 this.logger.info(`Fetching forecast for ${location.label} (${location.latitude}, ${location.longitude})`);
-                const forecast = await api.getForecast(location.latitude, location.longitude);
+                const forecast = await api.getForecast(location.latitude, location.longitude, location.label);
                 forecasts.push(forecast);
             } catch (error) {
                 this.logger.error(`Failed to fetch forecast for ${location.label}: ${error}`);
@@ -363,13 +363,19 @@ export class SkyConditionsImage {
         };
 
         const stops = [
-            { p: 0.0, c: '#041a4a' }, // deeper, slightly bluer than muted
-            { p: 0.25, c: '#163f75' }, // more blue but not vivid
-            { p: 0.5, c: '#6eaed3' }, // softened cyan
-            { p: 0.85, c: '#bfc5c8' }, // light gray with a touch of blue
+            { p: 0.0, c: '#03153c' }, // deeper, slightly bluer than muted
+            { p: 0.10, c: '#193a65' }, // more blue but not vivid
+            { p: 0.5, c: '#4e89ab' }, // softened cyan
+            { p: 0.85, c: '#89b6cd' }, // light gray with a touch of blue
             { p: 1.0, c: '#f0f0f0' }  // near-white
         ];
 
+        // explain this mapping in comments: we take the cloud percent, 
+        // normalize to 0-1, then find where it falls in the stops array. 
+        // We then interpolate between the two nearest colors to get a smooth gradient. 
+        // This creates a more visually appealing and informative color scale for 
+        // cloud cover, where low values are darker and bluer, and high values are 
+        // lighter and more neutral.
         const t = clamp(cloudPercent / 100.0, 0, 1);
         // find interval
         let left = stops[0];
@@ -399,8 +405,8 @@ export class SkyConditionsImage {
         const map: { [k: number]: string } = {
             0: '#ffffff', // Cloudy (white)
             1: '#c8c8c8', // Poor (light gray)
-            2: '#95bfd6', // Below Average (soft light blue)
-            3: '#86c0e6', // Average (soft sky blue)
+            2: '#7bb2cf', // Below Average (soft light blue)
+            3: '#3982b2', // Average (soft sky blue)
             4: '#2f57b0', // Above Average (moderate blue)
             5: '#0b3160'  // Excellent (deep blue)
         };

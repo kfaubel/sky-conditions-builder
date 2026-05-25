@@ -30,11 +30,13 @@ export class AstrosphericAPI {
     }
 
     // Write a CSV file containing UTC/local timestamps and the primary forecast values for
-    // cloud cover, seeing and wind speed. Filename is derived from the cacheKey for clarity.
-    private writeForecastCSV(cacheKey: string, data: AstrosphericResponse): void {
+    // cloud cover, seeing and wind speed. Filename is derived from the location label when provided.
+    private writeForecastCSV(cacheKey: string, data: AstrosphericResponse, locationLabel?: string): void {
         try {
             const safeKey = cacheKey.replace(/[^0-9a-zA-Z._-]/g, '_');
-            const filename = `forecast-${safeKey}.csv`;
+            const safeLabel = (locationLabel || '').trim().replace(/[^0-9a-zA-Z._-]/g, '_');
+            const fileStem = safeLabel || safeKey;
+            const filename = `forecast-${fileStem}.csv`;
             const startUTC = moment.tz(data.UTCStartTime, 'UTC');
             const tz = data.TimeZone || 'UTC';
             const cloud = data.RDPS_CloudCover || [];
@@ -48,7 +50,10 @@ export class AstrosphericAPI {
             for (let i = 0; i < maxLen; i++) {
                 const t = startUTC.clone().add(i, 'hours');
                 const local = t.clone().tz(tz);
-                const cloudVal = cloud[i]?.Value?.ActualValue ?? '';
+                const cloudRaw = cloud[i]?.Value?.ActualValue;
+                const cloudVal = typeof cloudRaw === 'number'
+                    ? Math.min(100, Math.max(1, Math.round(cloudRaw)))
+                    : '';
                 const seeingVal = seeing[i]?.Value?.ActualValue ?? '';
                 const windVal = wind[i]?.Value?.ActualValue ?? '';
                 const utcDate = t.format('YYYY-MM-DD');
@@ -77,9 +82,10 @@ export class AstrosphericAPI {
         }
     }
 
-    async getForecast(latitude: number, longitude: number): Promise<AstrosphericResponse> {
+    async getForecast(latitude: number, longitude: number, locationLabel?: string): Promise<AstrosphericResponse> {
         // Check cache first
-        const cacheKey = `${latitude.toFixed(2)},${longitude.toFixed(2)}`;
+        // Use higher precision so nearby locations do not collapse to the same key/filename.
+        const cacheKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
         
         // If a disk-backed Kache is provided, consult it first
         if (this.kache) {
@@ -87,7 +93,7 @@ export class AstrosphericAPI {
                 const cached = this.kache.get(cacheKey) as AstrosphericResponse | null;
                 if (cached) {
                     if ((cached as any)._source === undefined) (cached as any)._source = 'cached';
-                    this.writeForecastCSV(cacheKey, cached);
+                    this.writeForecastCSV(cacheKey, cached, locationLabel);
                     this.logger.info(`Using cached value from Kache for sky conditions ${cacheKey}`);
                     return cached;
                 }
@@ -117,7 +123,7 @@ export class AstrosphericAPI {
                 
                 if (response && response.data) (response.data as any)._source = 'api';
                 // write CSV for API-fetched data
-                this.writeForecastCSV(cacheKey, response.data);
+                this.writeForecastCSV(cacheKey, response.data, locationLabel);
 
                 // Cache the result using provided kache
                 if (this.kache && this.cacheDurationMs > 0) {

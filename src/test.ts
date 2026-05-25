@@ -25,6 +25,8 @@ async function run() {
 
     // Option: update mock JSON files from live API. Default: off. Use --update-mocks to enable.
     const updateMocks = process.argv.includes('--update-mocks');
+    // Option: use mock JSON files for forecast calls. Default: off. Use --use-mocks to enable.
+    const useMocks = process.argv.includes('--use-mocks');
 
     // helper to extend arrays to REQUIRED_HOURS
     const REQUIRED_HOURS = 72; // match SkyConditionsImage.NUM_SQUARES
@@ -40,11 +42,12 @@ async function run() {
     };
 
     if (updateMocks) {
+        logger.info('Updating mock JSON files from live API...');  
         const api = new AstrosphericAPI(logger, config.apiKey, config.baseURL, config.cacheDurationMinutes, kache);
         for (const loc of config.locations) {
             try {
                 logger.info(`Fetching live forecast for ${loc.label} (${loc.latitude}, ${loc.longitude}) to update mock...`);
-                const data = await api.getForecast(loc.latitude, loc.longitude) as AstrosphericResponse;
+                const data = await api.getForecast(loc.latitude, loc.longitude, loc.label) as AstrosphericResponse;
                 const safeName = loc.label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
                 const filename = `mock-data-${safeName}.json`;
                 fs.writeFileSync(filename, JSON.stringify(data, null, 2), 'utf8');
@@ -57,34 +60,45 @@ async function run() {
         logger.info('Not updating mock files (use --update-mocks to refresh)');
     }
 
-    // Monkey-patch AstrosphericAPI.getForecast to return mock files when available, falling back to live API.
-    const originalGetForecast = AstrosphericAPI.prototype.getForecast;
-    AstrosphericAPI.prototype.getForecast = async function(this: any, latitude: number, longitude: number) {
-        // Attempt to find a mock file by matching coordinates to known mock filenames
-        // Build candidate filename by searching config locations list for matching coords
-        const loc = config.locations.find(l => l.latitude.toFixed(2) === latitude.toFixed(2) && l.longitude.toFixed(2) === longitude.toFixed(2));
-        if (loc) {
-            const safeName = loc.label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-            const filename = `mock-data-${safeName}.json`;
-            if (fs.existsSync(filename)) {
-                try {
-                    logger.info(`[Mock] Loading data from ${filename}`);
-                    const data = JSON.parse(fs.readFileSync(filename, 'utf8')) as AstrosphericResponse;
+    if (useMocks) {
+        logger.info('Using mock forecast files (enabled via --use-mocks)');
+        // Monkey-patch AstrosphericAPI.getForecast to return mock files when available, falling back to live API.
+        const originalGetForecast = AstrosphericAPI.prototype.getForecast;
+        AstrosphericAPI.prototype.getForecast = async function(this: any, latitude: number, longitude: number, locationLabel?: string) {
+            // Attempt to find a mock file by matching coordinates to known mock filenames
+            // Build candidate filename by searching config locations list for matching coords
+            const loc = config.locations.find(l => l.latitude.toFixed(2) === latitude.toFixed(2) && l.longitude.toFixed(2) === longitude.toFixed(2));
+            if (loc) {
+                const safeName = loc.label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                const filename = `mock-data-${safeName}.json`;
+                if (fs.existsSync(filename)) {
+                    try {
+                        logger.info(`[Mock] Loading data from ${filename}`);
+                        const data = JSON.parse(fs.readFileSync(filename, 'utf8')) as AstrosphericResponse;
 
-                    if ((data as any).RDPS_CloudCover) (data as any).RDPS_CloudCover = extendArray((data as any).RDPS_CloudCover) as any;
-                    if ((data as any).Astrospheric_Seeing) (data as any).Astrospheric_Seeing = extendArray((data as any).Astrospheric_Seeing) as any;
-                    if ((data as any).RDPS_WindVelocity) (data as any).RDPS_WindVelocity = extendArray((data as any).RDPS_WindVelocity) as any;
+                        if ((data as any).RDPS_CloudCover) (data as any).RDPS_CloudCover = extendArray((data as any).RDPS_CloudCover) as any;
+                        if ((data as any).Astrospheric_Seeing) (data as any).Astrospheric_Seeing = extendArray((data as any).Astrospheric_Seeing) as any;
+                        if ((data as any).RDPS_WindVelocity) (data as any).RDPS_WindVelocity = extendArray((data as any).RDPS_WindVelocity) as any;
 
-                    return data;
-                } catch (err) {
-                    logger.error(`[Mock] Failed to load mock ${filename}: ${err}`);
-                    // fall through to live
+                        (data as any)._source = 'mock';
+                        const cacheKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+                        if (typeof (this as any).writeForecastCSV === 'function') {
+                            (this as any).writeForecastCSV(cacheKey, data, locationLabel ?? loc.label);
+                        }
+
+                        return data;
+                    } catch (err) {
+                        logger.error(`[Mock] Failed to load mock ${filename}: ${err}`);
+                        // fall through to live
+                    }
                 }
             }
-        }
-        // No mock found or failed to read — fall back to original implementation
-        return originalGetForecast.apply(this, [latitude, longitude]);
-    };
+            // No mock found or failed to read — fall back to original implementation
+            return originalGetForecast.apply(this, [latitude, longitude, locationLabel]);
+        };
+    } else {
+        logger.info('Using live/cached API data (default). Pass --use-mocks to use mock JSON files.');
+    }
 
     const skyImage = new SkyConditionsImage(logger, writer, kache);
 
