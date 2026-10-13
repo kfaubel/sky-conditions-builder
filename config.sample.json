@@ -1,6 +1,6 @@
 {
     "title": "Sky Conditions",
-    "baseURL": "https://astrosphericpublicaccess.azurewebsites.net/api/",
+    "baseURL": "https://v2-api-public.astrospheric.com/api/",
     "apiKey": "YOUR_ASTROSPHERIC_API_KEY_HERE",
     "cacheDurationMinutes": 1440,
     "outputFilename": "sky-conditions.jpg",

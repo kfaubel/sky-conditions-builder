@@ -15,6 +15,7 @@
     "clean": "shx rm -rf build",
     "test": "npm run build && node app.js",
     "start": "npm run build && node app.js",
+    "live": "npm run build && node app.js --no-cache",
     "prepare": "npm run build",
     "lint": "eslint src/**/*.ts"
   },

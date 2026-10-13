@@ -56,15 +56,15 @@ export class SkyConditionsImage {
     private readonly GRID_COLOR = "#666666";
     private readonly CURRENT_TIME_COLOR = "#FF0000";
     
-    private readonly LEFT_MARGIN = 260;     // Space for row labels (moved right for larger labels)
-    private readonly TOP_MARGIN = 260;      // Space for title and time labels (moved further down)
+    private readonly LEFT_MARGIN = 250;     // Space for row labels
+    private readonly TOP_MARGIN = 220;      // Space for title and time labels
     private readonly SQUARE_WIDTH = 20;     // Narrow squares horizontally (hours across)
-    private readonly SQUARE_HEIGHT = 40;    // Taller squares vertically (previous height)
+    private readonly SQUARE_HEIGHT = 30;    // Compressed height for 4-location layout
     private readonly SQUARE_BORDER = 2;     // Border between squares
     private readonly SQUARE_WITH_BORDER = this.SQUARE_WIDTH + this.SQUARE_BORDER;
     
-    private readonly LOCATION_ROW_HEIGHT = 290;  // Height for each location's 3 sub-rows (slightly increased spacing)
-    private readonly SUB_ROW_HEIGHT = 80;        // Height for each data type row (increased spacing)
+    private readonly LOCATION_ROW_HEIGHT = 236;  // Height for each location's 3 sub-rows
+    private readonly SUB_ROW_HEIGHT = 80;        // Height for each data type row (legacy constant, not currently used)
     
     private readonly TIME_INTERVAL = 1;     // Show every 1 hour
     private readonly NUM_SQUARES = 72;      // 72 hours / 1 hour
@@ -78,24 +78,20 @@ export class SkyConditionsImage {
     }
 
     //async getImageStream(config: SkyConditionsConfig): Promise<ImageResult> {
-    public async getImage(title: string, apiKey: string, baseURL: string, cacheDurationMinutes: number, locations: Location[], outputFilename: string ): Promise<ImageResult | null> {
+    private async renderImage(title: string, apiKey: string, baseURL: string, cacheDurationMinutes: number, locations: Location[]): Promise<any> {
         this.logger.info("Starting sky conditions image generation");
         this.logger.verbose(`Font registration status: ${registeredFont !== null}, Font name: ${registeredFontName}`);
-        
-        // Create canvas
+
         const img = PImage.make(this.IMAGE_WIDTH, this.IMAGE_HEIGHT);
         const ctx = img.getContext("2d");
 
-        // Fill background
         ctx.fillStyle = this.BACKGROUND_COLOR;
         ctx.fillRect(0, 0, this.IMAGE_WIDTH, this.IMAGE_HEIGHT);
 
-        // Draw title if provided
         if (title) {
             this.drawTitle(ctx, title);
         }
 
-        // Fetch data for all locations using injected kache if provided
         const api = new AstrosphericAPI(this.logger, apiKey, baseURL, cacheDurationMinutes, this.kache ?? null, this.imageWriter ?? null);
         const forecasts: (AstrosphericResponse | null)[] = [];
 
@@ -110,23 +106,16 @@ export class SkyConditionsImage {
             }
         }
 
-        // (Time labels and dividers are drawn per-location using the shared global UTC timeline)
-        
-        const locationRowHeight = this.LOCATION_ROW_HEIGHT; // preserve group spacing
-        // Internal spacing between the three sub-rows: use square height plus a small gap
-        const GAP_BETWEEN_ROWS = 15; // 15px gap between square rows
+        const locationRowHeight = this.LOCATION_ROW_HEIGHT;
+        const GAP_BETWEEN_ROWS = 15;
         const subRowHeight = this.SQUARE_HEIGHT + GAP_BETWEEN_ROWS;
 
-        // Determine the earliest local midnight across all locations (using each location's current date).
-        // Use that as the shared UTC start so the display always shows exactly three days (72 hours)
-        // anchored to the earliest local day. This allows locations in later zones to show leading blanks.
         let earliestLocalMidnight: moment.Moment | null = null;
         for (const loc of locations) {
             try {
                 const lm = moment.tz(loc.timezone).startOf('day');
                 if (!earliestLocalMidnight || lm.isBefore(earliestLocalMidnight)) earliestLocalMidnight = lm;
             } catch (err) {
-                // fallback to UTC if timezone invalid
                 const lm = moment.utc().startOf('day');
                 if (!earliestLocalMidnight || lm.isBefore(earliestLocalMidnight)) earliestLocalMidnight = lm;
             }
@@ -134,23 +123,25 @@ export class SkyConditionsImage {
         if (!earliestLocalMidnight) earliestLocalMidnight = moment.utc().startOf('day');
         const globalStartUTC = earliestLocalMidnight.clone().tz('UTC');
 
-        // Draw each location using the shared global timeline so columns line up across locations
         for (let i = 0; i < locations.length; i++) {
             const forecast = forecasts[i];
             if (forecast) {
                 const yOffset = this.TOP_MARGIN + i * locationRowHeight;
-                // Draw day labels and midnight dividers anchored to the shared global timeline
                 this.drawTimeLabelsForLocation(ctx, forecast, locations[i], yOffset, globalStartUTC);
                 this.drawMidnightLinesForLocation(ctx, forecast, locations[i], yOffset, locationRowHeight, subRowHeight, globalStartUTC);
                 this.drawLocation(ctx, locations[i], forecast, yOffset, locationRowHeight, subRowHeight, globalStartUTC);
             }
         }
 
-        // Encode to JPEG
+        return img;
+    }
+
+    public async getImage(title: string, apiKey: string, baseURL: string, cacheDurationMinutes: number, locations: Location[], outputFilename: string ): Promise<ImageResult | null> {
+        const img = await this.renderImage(title, apiKey, baseURL, cacheDurationMinutes, locations);
+
         this.logger.info("Encoding image to JPEG...");
         const jpegData = await this.encodeJPEG(img);
 
-        // If an ImageWriter is injected, use it to save the file using config.outputFilename
         if (this.imageWriter && outputFilename) {
             try {
                 this.imageWriter.saveFile(outputFilename, jpegData);
@@ -166,6 +157,26 @@ export class SkyConditionsImage {
                 mimeType: "image/jpeg"
             }
         };
+    }
+
+    public async getImagePng(title: string, apiKey: string, baseURL: string, cacheDurationMinutes: number, locations: Location[], outputFilename: string): Promise<string> {
+        const img = await this.renderImage(title, apiKey, baseURL, cacheDurationMinutes, locations);
+        const pngPath = outputFilename;
+        const parentDir = pngPath.includes('/') ? pngPath.substring(0, pngPath.lastIndexOf('/')) : pngPath.includes('\\') ? pngPath.substring(0, pngPath.lastIndexOf('\\')) : '.';
+        if (parentDir && parentDir !== '.') {
+            fs.mkdirSync(parentDir, { recursive: true });
+        }
+
+        await new Promise<void>((resolve, reject) => {
+            const stream = fs.createWriteStream(pngPath);
+            stream.on('finish', () => resolve());
+            stream.on('error', reject);
+            PImage.encodePNGToStream(img, stream)
+                .then(() => stream.end())
+                .catch(reject);
+        });
+
+        return pngPath;
     }
 
     private drawTitle(ctx: any, title: string): void {
@@ -249,16 +260,29 @@ export class SkyConditionsImage {
         const yStart = Math.max(40, labelTop); // don't go above title area
         const yEnd = yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT; // bottom of Wind Speed
 
+        // If this location is west of the viewer's local timezone, skip only the first divider.
+        // This removes the leading midnight line that appears near the start of the row for westward locations.
+        const viewerOffset = -new Date().getTimezoneOffset();
+        const locationOffset = moment.tz(location.timezone).utcOffset();
+        const isWestOfViewer = locationOffset < viewerOffset;
+
+        const dividerIndices: number[] = [];
         for (let i = 0; i < this.NUM_SQUARES; i++) {
             const tUTC = globalStartUTC.clone().add(i, 'hours');
             const local = tUTC.clone().tz(location.timezone);
             if (local.hour() === 0 && i > 0) {
-                const x = this.LEFT_MARGIN + i * this.SQUARE_WITH_BORDER;
-                ctx.beginPath();
-                ctx.moveTo(x, yStart);
-                ctx.lineTo(x, yEnd);
-                ctx.stroke();
+                dividerIndices.push(i);
             }
+        }
+
+        const startIdx = isWestOfViewer ? 1 : 0;
+        for (let k = startIdx; k < dividerIndices.length; k++) {
+            const i = dividerIndices[k];
+            const x = this.LEFT_MARGIN + i * this.SQUARE_WITH_BORDER;
+            ctx.beginPath();
+            ctx.moveTo(x, yStart);
+            ctx.lineTo(x, yEnd);
+            ctx.stroke();
         }
     }
 
@@ -267,9 +291,11 @@ export class SkyConditionsImage {
 
           // Draw location label above the rows (larger, with more space below)
           ctx.fillStyle = this.TEXT_COLOR;
-          ctx.font = `56pt '${registeredFontName}'`;
-          const labelY = yOffset - 60; // move label further above rows to give more space
+          ctx.font = `48pt '${registeredFontName}'`;
+          const labelY = yOffset - 40; // move label down a bit more while keeping all other labels fixed
+          // PureImage can ignore CSS-style font weights; draw twice with a 1px offset for a consistent bold look.
           ctx.fillText(location.label, this.LABEL_MARGIN, labelY);
+          ctx.fillText(location.label, this.LABEL_MARGIN + 1, labelY);
           this.logger.verbose(`  Location label: "${location.label}" at (${this.LABEL_MARGIN}, ${labelY})`);
           // ensure subsequent labels align left
           ctx.textAlign = 'left';
@@ -280,7 +306,7 @@ export class SkyConditionsImage {
           const labelOffsetX = this.LABEL_MARGIN + 20;
           ctx.fillText("Clouds", labelOffsetX, yOffset + this.SQUARE_HEIGHT / 2 + 5);
           ctx.fillText("Seeing", labelOffsetX, yOffset + subRowHeight + this.SQUARE_HEIGHT / 2 + 5);
-          ctx.fillText("Wind", labelOffsetX, yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT / 2 + 5);
+          ctx.fillText("Transparency", labelOffsetX, yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT / 2 + 5);
           this.logger.verbose(`  Row labels drawn`);
 
          // Get current time in this location's timezone
@@ -312,13 +338,16 @@ export class SkyConditionsImage {
             if (forecastIndex < 0) {
                 continue;
             }
-            const lastIndex = Math.max(0, forecast.RDPS_CloudCover.length - 1);
+            const cloudSeries = forecast.RDPS_CloudCover ?? [];
+            const seeingSeries = forecast.Astrospheric_Seeing ?? [];
+            const transparencySeries = forecast.RDPS_WindVelocity ?? [];
+            const lastIndex = Math.max(0, cloudSeries.length - 1);
             if (forecastIndex > lastIndex) {
                 indexToUse = lastIndex; // repeat last known hour
             }
 
             // Sky Cover (Cloud Cover)
-            const cloudData = forecast.RDPS_CloudCover[indexToUse];
+            const cloudData = cloudSeries[indexToUse];
             const cloudPercent = cloudData?.Value?.ActualValue ?? null;
             if (cloudPercent !== null) {
                 ctx.fillStyle = this.getCloudCoverColor(cloudPercent);
@@ -326,19 +355,18 @@ export class SkyConditionsImage {
             }
 
             // Seeing
-            const seeingData = forecast.Astrospheric_Seeing[indexToUse];
+            const seeingData = seeingSeries[indexToUse];
             const seeingValue = seeingData?.Value?.ActualValue ?? null;
             if (seeingValue !== null) {
                 ctx.fillStyle = this.getSeeingColor(seeingValue);
                 ctx.fillRect(x, yOffset + subRowHeight, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
             }
 
-            // Wind Speed
-            const windData = forecast.RDPS_WindVelocity[indexToUse];
-            const windMs = windData?.Value?.ActualValue ?? null;
-            if (windMs !== null) {
-                const windMph = windMs * 2.237; // Convert m/s to mph
-                ctx.fillStyle = this.getWindSpeedColor(windMph);
+            // Transparency
+            const transparencyData = transparencySeries[indexToUse];
+            const transparencyValue = transparencyData?.Value?.ActualValue ?? null;
+            if (transparencyValue !== null) {
+                ctx.fillStyle = this.getTransparencyColor(transparencyValue);
                 ctx.fillRect(x, yOffset + subRowHeight * 2, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
             }
          }
@@ -413,13 +441,49 @@ export class SkyConditionsImage {
         return map[idx];
     }
 
-    private getWindSpeedColor(windMph: number): string {
-        // Desaturated-but-slightly-richer palette for wind speed
-        if (windMph <= 5) return '#02182e';    // very dark slate-blue
-        if (windMph <= 10) return '#163f66';   // muted deep blue
-        if (windMph <= 15) return '#31678f';   // medium blue
-        if (windMph <= 20) return '#6f93b0';   // lighter blue-gray
-        return '#cfd7dc';                      // pale gray for very high wind
+    private getTransparencyColor(transparencyValue: number): string {
+        // Transparency is a lower-is-worse / higher-is-better scale in the API.
+        // Map it to a gradient from dim/dark to bright/clear.
+        const clamp = (v: number, a = 0, b = 100) => Math.max(a, Math.min(b, v));
+        const t = clamp(transparencyValue, 0, 100) / 100;
+        const stops = [
+            { p: 0.0, c: '#02182e' },
+            { p: 0.25, c: '#163f66' },
+            { p: 0.5, c: '#31678f' },
+            { p: 0.75, c: '#6f93b0' },
+            { p: 1.0, c: '#cfd7dc' }
+        ];
+
+        let left = stops[0];
+        let right = stops[stops.length - 1];
+        for (let i = 0; i < stops.length - 1; i++) {
+            if (t >= stops[i].p && t <= stops[i + 1].p) {
+                left = stops[i];
+                right = stops[i + 1];
+                break;
+            }
+        }
+
+        const localT = (t - left.p) / (right.p - left.p || 1);
+        const hexToRgb = (hex: string) => {
+            const h = hex.replace('#', '');
+            return {
+                r: parseInt(h.substring(0, 2), 16),
+                g: parseInt(h.substring(2, 4), 16),
+                b: parseInt(h.substring(4, 6), 16),
+            };
+        };
+        const rgbToHex = (r: number, g: number, b: number) => {
+            const toHex = (n: number) => ('0' + Math.round(n).toString(16)).slice(-2);
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        };
+
+        const lr = hexToRgb(left.c);
+        const rr = hexToRgb(right.c);
+        const r = lr.r + (rr.r - lr.r) * localT;
+        const g = lr.g + (rr.g - lr.g) * localT;
+        const b = lr.b + (rr.b - lr.b) * localT;
+        return rgbToHex(r, g, b);
     }
 
     private async encodeJPEG(image: any): Promise<Buffer> {

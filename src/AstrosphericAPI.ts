@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import * as fs from 'fs';
 import * as moment from 'moment-timezone';
 import { LoggerInterface } from "./Logger";
-import { AstrosphericResponse } from "./types";
+import { AstrosphericResponse, HourValue } from "./types";
 import type { KacheInterface } from "./Kache";
 import type { ImageWriterInterface } from "./SimpleImageWriter";
 
@@ -18,15 +18,137 @@ export class AstrosphericAPI {
     constructor(logger: LoggerInterface, apiKey: string, baseURL?: string, cacheDurationMinutes?: number, kache?: KacheInterface | null, imageWriter?: ImageWriterInterface | null) {
         this.logger = logger;
         this.apiKey = apiKey;
-        const base = baseURL || "https://astrosphericpublicaccess.azurewebsites.net/api/";
-        this.endpoint = base + "GetForecastData_V1";
+        const base = (baseURL || "https://v2-api-public.astrospheric.com/api/").replace(/\/+$/, "");
+        const normalizedBase = base.endsWith("/GetForecastData") || base.endsWith("/GetForecastData_V1")
+            ? base.replace(/\/GetForecastData(?:_V1)?$/, "")
+            : base;
+        this.endpoint = `${normalizedBase}/GetForecastData`;
         this.kache = kache ?? null;
         this.imageWriter = imageWriter ?? null;
         this.cacheDurationMs = (cacheDurationMinutes || 0) * 60 * 1000;
+
+        this.logger.info(`Astrospheric API endpoint: ${this.endpoint}`);
         
         if (cacheDurationMinutes && cacheDurationMinutes > 0) {
             this.logger.info(`Cache enabled: ${cacheDurationMinutes} minutes`);
         }
+    }
+
+    private logApiCreditStatus(response: Partial<AstrosphericResponse>, context: string): void {
+        const costOfCall = response.APICreditCostOfCall ?? response.APICreditUsedToday ?? 'unknown';
+        const creditsRemaining = response.APICreditsRemaining ?? response.APICreditsRemainingToday ?? 'unknown';
+
+        const message = `Astrospheric API credit status for ${context}: APICreditCostOfCall=${costOfCall}, APICreditsRemaining=${creditsRemaining}`;
+
+        if (typeof creditsRemaining === 'number' && creditsRemaining < 10000) {
+            this.logger.warn(`${message}. Credits below 10000`);
+        }
+
+        this.logger.info(message);
+    }
+
+    private normalizeForecastResponse(data: AstrosphericResponse): AstrosphericResponse {
+        const normalized = { ...data } as AstrosphericResponse;
+
+        const convertMetricValue = (value: any, hourOffset: number, utcForecastHour?: string): HourValue | null => {
+            if (!value || typeof value !== 'object') return null;
+            const actualValue = typeof value.ActualValue === 'number' ? value.ActualValue : Number(value.ActualValue ?? NaN);
+            if (Number.isNaN(actualValue)) return null;
+            return {
+                Value: {
+                    ValueColor: value.ValueColor ?? '#000000',
+                    ActualValue: actualValue,
+                },
+                HourOffset: hourOffset,
+                UTCForecastHour: utcForecastHour,
+            };
+        };
+
+        const hourlyForecast = Array.isArray((normalized as any).HourlyForecast) ? (normalized as any).HourlyForecast as any[] : [];
+        if (hourlyForecast.length > 0) {
+            const cloudSeries = hourlyForecast
+                .map((entry, index) => convertMetricValue(entry.Cloud, entry.HourOffset ?? index, entry.UTCForecastHour))
+                .filter((value): value is HourValue => value !== null);
+            const seeingSeries = hourlyForecast
+                .map((entry, index) => convertMetricValue(entry.Seeing, entry.HourOffset ?? index, entry.UTCForecastHour))
+                .filter((value): value is HourValue => value !== null);
+            const transparencySeries = hourlyForecast
+                .map((entry, index) => convertMetricValue(entry.Transparency, entry.HourOffset ?? index, entry.UTCForecastHour))
+                .filter((value): value is HourValue => value !== null);
+            const temperatureSeries = hourlyForecast
+                .map((entry, index) => convertMetricValue(entry.Temperature, entry.HourOffset ?? index, entry.UTCForecastHour))
+                .filter((value): value is HourValue => value !== null);
+            const dewPointSeries = hourlyForecast
+                .map((entry, index) => convertMetricValue(entry.DewPoint, entry.HourOffset ?? index, entry.UTCForecastHour))
+                .filter((value): value is HourValue => value !== null);
+            const windDirectionSeries = hourlyForecast
+                .map((entry, index) => convertMetricValue(entry.WindDirection, entry.HourOffset ?? index, entry.UTCForecastHour))
+                .filter((value): value is HourValue => value !== null);
+
+            normalized.UTCStartTime ??= hourlyForecast[0]?.UTCForecastHour;
+            normalized.RDPS_CloudCover ??= cloudSeries;
+            normalized.Astrospheric_Seeing ??= seeingSeries;
+            normalized.RDPS_WindVelocity ??= transparencySeries;
+            normalized.RDPS_Temperature ??= temperatureSeries;
+            normalized.RDPS_DewPoint ??= dewPointSeries;
+            normalized.RDPS_WindDirection ??= windDirectionSeries;
+            normalized.Astrospheric_Transparency ??= transparencySeries;
+        }
+
+        if (normalized.RDPS_CloudCover === undefined && Array.isArray(normalized.Cloud)) {
+            normalized.RDPS_CloudCover = normalized.Cloud;
+        }
+        if (normalized.Astrospheric_Seeing === undefined && Array.isArray(normalized.Seeing)) {
+            normalized.Astrospheric_Seeing = normalized.Seeing;
+        }
+        if (normalized.RDPS_WindVelocity === undefined && Array.isArray(normalized.Transparency)) {
+            normalized.RDPS_WindVelocity = normalized.Transparency;
+        }
+        if (normalized.RDPS_Temperature === undefined && Array.isArray(normalized.Temperature)) {
+            normalized.RDPS_Temperature = normalized.Temperature;
+        }
+        if (normalized.RDPS_DewPoint === undefined && Array.isArray(normalized.DewPoint)) {
+            normalized.RDPS_DewPoint = normalized.DewPoint;
+        }
+        if (normalized.RDPS_WindDirection === undefined && Array.isArray(normalized.WindDirection)) {
+            normalized.RDPS_WindDirection = normalized.WindDirection;
+        }
+        if (normalized.Astrospheric_Transparency === undefined && Array.isArray(normalized.Transparency)) {
+            normalized.Astrospheric_Transparency = normalized.Transparency;
+        }
+
+        if (!normalized.UTCStartTime) {
+            const series = [
+                normalized.RDPS_CloudCover,
+                normalized.Astrospheric_Seeing,
+                normalized.RDPS_WindVelocity,
+                normalized.RDPS_Temperature,
+                normalized.RDPS_DewPoint,
+                normalized.RDPS_WindDirection,
+                normalized.Astrospheric_Transparency,
+            ].filter((value): value is HourValue[] => Array.isArray(value));
+
+            let earliestUTC: string | undefined;
+            for (const entries of series) {
+                for (const entry of entries) {
+                    const forecastHour = entry.UTCForecastHour;
+                    if (!forecastHour) continue;
+                    if (!earliestUTC || forecastHour < earliestUTC) {
+                        earliestUTC = forecastHour;
+                    }
+                }
+            }
+
+            if (earliestUTC) {
+                normalized.UTCStartTime = earliestUTC;
+            }
+        }
+
+        if (normalized.APICreditUsedToday === undefined && normalized.APICreditCostOfCall !== undefined) {
+            normalized.APICreditUsedToday = normalized.APICreditCostOfCall;
+        }
+
+        return normalized;
     }
 
     // Write a CSV file containing UTC/local timestamps and the primary forecast values for
@@ -92,10 +214,21 @@ export class AstrosphericAPI {
             try {
                 const cached = this.kache.get(cacheKey) as AstrosphericResponse | null;
                 if (cached) {
-                    if ((cached as any)._source === undefined) (cached as any)._source = 'cached';
-                    this.writeForecastCSV(cacheKey, cached, locationLabel);
-                    this.logger.info(`Using cached value from Kache for sky conditions ${cacheKey}`);
-                    return cached;
+                    const normalizedCached = this.normalizeForecastResponse(cached);
+                    const hasForecastData = !!(
+                        normalizedCached.RDPS_CloudCover?.length ||
+                        normalizedCached.Astrospheric_Seeing?.length ||
+                        normalizedCached.RDPS_WindVelocity?.length
+                    );
+
+                    if (hasForecastData) {
+                        if ((normalizedCached as any)._source === undefined) (normalizedCached as any)._source = 'cached';
+                        this.writeForecastCSV(cacheKey, normalizedCached, locationLabel);
+                        this.logger.info(`Using cached value from Kache for sky conditions ${cacheKey}`);
+                        return normalizedCached;
+                    }
+
+                    this.logger.warn(`Cached forecast for ${cacheKey} was missing forecast arrays; fetching a fresh value from the API.`);
                 }
             } catch (e) {
                 this.logger.verbose(`Kache read error for ${cacheKey}: ${e}`);
@@ -107,9 +240,11 @@ export class AstrosphericAPI {
                 Latitude: latitude,
                 Longitude: longitude,
                 APIKey: this.apiKey,
+                Variables: ["Cloud", "Seeing", "Transparency"],
             };
 
             this.logger.info(`No cached value found for ${cacheKey}. Fetching forecast from API.`);
+            this.logger.info(`Requesting Astrospheric forecast from URL: ${this.endpoint}`);
 
             const response = await axios.post<AstrosphericResponse>(this.endpoint, requestData, {
                 headers: {
@@ -119,24 +254,26 @@ export class AstrosphericAPI {
             });
 
             if (response.status === 200) {
-                this.logger.verbose(`Successfully fetched forecast. API Credits used: ${response.data.APICreditUsedToday}`);
-                
-                if (response && response.data) (response.data as any)._source = 'api';
+                const normalizedResponse = this.normalizeForecastResponse(response.data);
+                this.logger.verbose(`Successfully fetched forecast. API Credits used: ${normalizedResponse.APICreditUsedToday ?? normalizedResponse.APICreditCostOfCall ?? 'unknown'}`);
+                this.logApiCreditStatus(normalizedResponse, `${locationLabel ?? cacheKey}`);
+
+                if (normalizedResponse) (normalizedResponse as any)._source = 'api';
                 // write CSV for API-fetched data
-                this.writeForecastCSV(cacheKey, response.data, locationLabel);
+                this.writeForecastCSV(cacheKey, normalizedResponse, locationLabel);
 
                 // Cache the result using provided kache
                 if (this.kache && this.cacheDurationMs > 0) {
                     try {
                         const expirationTime = Date.now() + this.cacheDurationMs;
-                        this.kache.set(cacheKey, response.data, expirationTime);
+                        this.kache.set(cacheKey, normalizedResponse, expirationTime);
                         this.logger.info(`Kache: Adding  ${cacheKey} to cache with expiration in ${this.cacheDurationMs / 60000} minutes`);
                     } catch (e) {
                         this.logger.error(`Kache set error for ${cacheKey}: ${e}`);
                     }
                 }
                 
-                return response.data;
+                return normalizedResponse;
             } else {
                 throw new Error(`Unexpected response status: ${response.status}`);
             }

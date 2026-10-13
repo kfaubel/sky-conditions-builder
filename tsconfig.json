@@ -15,7 +15,6 @@
     "sourceMap": true,
     "outDir": "./build/",
     "rootDir": "./src",
-    "baseUrl": "./",
     "declaration": true,
 
     "noImplicitAny": true,

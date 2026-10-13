@@ -8,7 +8,6 @@ import type { SkyConditionsConfig, AstrosphericResponse } from './types';
 
 // Create a structured logger and helpers (Kache + SimpleImageWriter)
 const logger = new Logger('sample', 'info');
-const kache = new Kache(logger, 'astrospheric-cache.json');
 const writer = new SimpleImageWriter(logger, '.');
 
 async function run() {
@@ -22,6 +21,15 @@ async function run() {
     }
 
     const config: SkyConditionsConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+    // Option: disable disk cache to force live API requests. Default: off.
+    const noCache = process.argv.includes('--no-cache');
+    const effectiveCacheDurationMinutes = noCache ? 0 : config.cacheDurationMinutes;
+    const kache = noCache ? null : new Kache(logger, 'astrospheric-cache.json');
+
+    if (noCache) {
+        logger.info('Disk cache disabled (--no-cache): forcing live API requests');
+    }
 
     // Option: update mock JSON files from live API. Default: off. Use --update-mocks to enable.
     const updateMocks = process.argv.includes('--update-mocks');
@@ -43,7 +51,7 @@ async function run() {
 
     if (updateMocks) {
         logger.info('Updating mock JSON files from live API...');  
-        const api = new AstrosphericAPI(logger, config.apiKey, config.baseURL, config.cacheDurationMinutes, kache);
+        const api = new AstrosphericAPI(logger, config.apiKey, config.baseURL, effectiveCacheDurationMinutes, kache);
         for (const loc of config.locations) {
             try {
                 logger.info(`Fetching live forecast for ${loc.label} (${loc.latitude}, ${loc.longitude}) to update mock...`);
@@ -104,7 +112,7 @@ async function run() {
 
     try {
         logger.info('Fetching sky conditions data...');
-        const result = await skyImage.getImage(config.title, config.apiKey, config.baseURL, config.cacheDurationMinutes, config.locations, config.outputFilename);
+        const result = await skyImage.getImage(config.title, config.apiKey, config.baseURL, effectiveCacheDurationMinutes, config.locations, config.outputFilename);
 
         if (result !== null && result.jpegImg !== null) {
             // If an injected writer was used, it has already saved the image. Otherwise, write a fallback file.

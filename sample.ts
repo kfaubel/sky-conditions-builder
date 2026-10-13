@@ -7,7 +7,7 @@ import { SimpleImageWriter } from './src/SimpleImageWriter.js';
 import type { SkyConditionsConfig, AstrosphericResponse } from './src/types.js';
 
 // Create a structured logger and helpers (Kache + SimpleImageWriter)
-const logger = new Logger('sample', 'info');
+const logger = new Logger('sample', 'verbose');
 const kache = new Kache(logger, 'astrospheric-cache.json');
 const writer = new SimpleImageWriter(logger, '.');
 
