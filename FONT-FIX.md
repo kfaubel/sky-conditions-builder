@@ -7,10 +7,10 @@ The labels are not appearing because:
 
 ## Working Solution
 
-Use this wrapper script instead of `sample.js`:
+Use a small wrapper script before importing the module:
 
 ```javascript
-// font-fix-sample.js
+// font-fix-wrapper.js
 const PImage = require('pureimage');
 const fs = require('fs');
 

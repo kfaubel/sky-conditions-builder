@@ -14,8 +14,8 @@ sky-conditions-builder/
 ├── index.d.ts                    # Type definitions
 ├── package.json                  # NPM configuration
 ├── tsconfig.json                 # TypeScript configuration
-├── sample.js                     # Example usage
-├── sample-config.json            # Example configuration
+├── app.js                       # Runtime entry point
+├── config.sample.json            # Example configuration
 ├── README.md                     # Documentation
 └── LICENSE                       # MIT License
 ```
@@ -105,8 +105,8 @@ if (result && result.jpegImg) {
 To test the module:
 
 1. Get an Astrospheric API key from https://www.astrospheric.com
-2. Update sample.js or sample-config.json with your API key
-3. Run: `node sample.js`
+2. Copy config.sample.json to config.json and add your API key
+3. Run: `node app.js`
 4. Check sky-conditions.jpg
 
 ## Color Scale Details

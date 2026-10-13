@@ -46,7 +46,7 @@ For development/testing with this repository:
 3. **Build and run:**
    ```bash
    npm run build
-   node sample.js
+   node app.js
    ```
 
 See [CONFIG-SETUP.md](CONFIG-SETUP.md) for detailed configuration documentation.
@@ -204,20 +204,6 @@ const config = {
 - **Benefits**: Reduces API credit consumption, faster generation, avoids rate limits
 - **Cache lifetime**: Specified in minutes (e.g., 1440 = 24 hours)
 - **Disable caching**: Set to `0` or omit the parameter
-
-## Development with Mock Data
-
-When API rate limits are reached, use pre-generated mock data:
-
-```bash
-# Use mock data instead of live API
-node sample-with-mocks.js
-
-# Regenerate mock data files
-node generate-mock-data.js
-```
-
-See [MOCK-DATA-README.md](MOCK-DATA-README.md) for complete documentation on mock data development workflow.
 
 ## Publishing to NPM
 
