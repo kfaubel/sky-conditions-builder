@@ -1,0 +1,128 @@
+{
+    "sun-times:31.5500,-99.3800:2026-10-13": {
+        "expiration": 1791954000000,
+        "comment": "Wed Oct 14 2026 01:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-13T12:39:20.269Z",
+            "sunsetISO": "2026-10-14T00:07:36.865Z",
+            "source": "astronomy-engine"
+        }
+    },
+    "sun-times:31.5500,-99.3800:2026-10-14": {
+        "expiration": 1792040400000,
+        "comment": "Thu Oct 15 2026 01:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-14T12:40:02.104Z",
+            "sunsetISO": "2026-10-15T00:06:27.355Z",
+            "source": "astronomy-engine"
+        }
+    },
+    "sun-times:31.5500,-99.3800:2026-10-15": {
+        "expiration": 1792126800000,
+        "comment": "Fri Oct 16 2026 01:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-15T12:40:44.293Z",
+            "sunsetISO": "2026-10-16T00:05:18.571Z",
+            "source": "astronomy-engine"
+        }
+    },
+    "sun-times:37.5000,-113.3200:2026-10-13": {
+        "expiration": 1791957600000,
+        "comment": "Wed Oct 14 2026 02:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-13T13:39:43.833Z",
+            "sunsetISO": "2026-10-14T00:58:37.117Z",
+            "source": "astronomy-engine"
+        }
+    },
+    "sun-times:37.5000,-113.3200:2026-10-14": {
+        "expiration": 1792044000000,
+        "comment": "Thu Oct 15 2026 02:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-14T13:40:39.805Z",
+            "sunsetISO": "2026-10-15T00:57:13.566Z",
+            "source": "astronomy-engine"
+        }
+    },
+    "sun-times:37.5000,-113.3200:2026-10-15": {
+        "expiration": 1792130400000,
+        "comment": "Fri Oct 16 2026 02:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-15T13:41:36.099Z",
+            "sunsetISO": "2026-10-16T00:55:50.774Z",
+            "source": "astronomy-engine"
+        }
+    },
+    "sun-times:42.6800,-71.4700:2026-10-13": {
+        "expiration": 1791950400000,
+        "comment": "Wed Oct 14 2026 00:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-13T10:56:23.684Z",
+            "sunsetISO": "2026-10-13T22:07:13.887Z",
+            "source": "approx"
+        }
+    },
+    "sun-times:42.6800,-71.4700:2026-10-14": {
+        "expiration": 1792036800000,
+        "comment": "Thu Oct 15 2026 00:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-14T10:57:33.895Z",
+            "sunsetISO": "2026-10-14T22:05:35.609Z",
+            "source": "approx"
+        }
+    },
+    "sun-times:42.6800,-71.4700:2026-10-15": {
+        "expiration": 1792123200000,
+        "comment": "Fri Oct 16 2026 00:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-15T10:58:44.420Z",
+            "sunsetISO": "2026-10-15T22:03:58.111Z",
+            "source": "approx"
+        }
+    },
+    "sun-times:41.7500,-71.2500:2026-10-13": {
+        "expiration": 1791950400000,
+        "comment": "Wed Oct 14 2026 00:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-13T10:54:39.318Z",
+            "sunsetISO": "2026-10-13T22:07:14.045Z",
+            "source": "approx"
+        }
+    },
+    "sun-times:41.7500,-71.2500:2026-10-14": {
+        "expiration": 1792036800000,
+        "comment": "Thu Oct 15 2026 00:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-14T10:55:46.781Z",
+            "sunsetISO": "2026-10-14T22:05:38.513Z",
+            "source": "approx"
+        }
+    },
+    "sun-times:41.7500,-71.2500:2026-10-15": {
+        "expiration": 1792123200000,
+        "comment": "Fri Oct 16 2026 00:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-15T10:56:54.562Z",
+            "sunsetISO": "2026-10-15T22:04:03.757Z",
+            "source": "approx"
+        }
+    },
+    "sun-times:31.5500,-99.3800:2026-10-12": {
+        "expiration": 1791867600000,
+        "comment": "Tue Oct 13 2026 01:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-12T12:38:38.786Z",
+            "sunsetISO": "2026-10-13T00:08:47.075Z",
+            "source": "astronomy-engine"
+        }
+    },
+    "sun-times:37.5000,-113.3200:2026-10-12": {
+        "expiration": 1791871200000,
+        "comment": "Tue Oct 13 2026 02:00:00 GMT-0400 (Eastern Daylight Time)",
+        "item": {
+            "sunriseISO": "2026-10-12T13:38:48.186Z",
+            "sunsetISO": "2026-10-13T01:00:01.398Z",
+            "source": "astronomy-engine"
+        }
+    }
+}

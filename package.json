@@ -20,17 +20,18 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
+    "astronomy-engine": "^2.1.19",
     "axios": "^1.7.2",
-    "pureimage": "^0.4.13",
-    "moment-timezone": "^0.5.45"
+    "moment-timezone": "^0.5.45",
+    "pureimage": "^0.4.13"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
     "eslint": "^8.57.0",
-    "typescript": "^5.4.5",
-    "shx": "^0.3.4"
+    "shx": "^0.3.4",
+    "typescript": "^5.4.5"
   },
   "keywords": [
     "astrophotography",

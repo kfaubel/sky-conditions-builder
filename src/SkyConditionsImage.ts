@@ -1,10 +1,13 @@
 import * as PImage from "pureimage";
+import * as Astronomy from "astronomy-engine";
 import * as moment from "moment-timezone";
 import * as fs from "fs";
 import { Writable } from "stream";
 import { LoggerInterface } from "./Logger";
 import { Location, ImageResult, AstrosphericResponse } from "./types";
 import { AstrosphericAPI } from "./AstrosphericAPI";
+import { SunTimesService } from "./SunTimesService";
+import { Kache } from "./Kache";
 import type { ImageWriterInterface } from "./SimpleImageWriter";
 import type { KacheInterface } from "./Kache";
 
@@ -47,6 +50,8 @@ export class SkyConditionsImage {
     private logger: LoggerInterface;
     private imageWriter?: ImageWriterInterface | null;
     private kache?: KacheInterface | null;
+    private sunKache: KacheInterface;
+    private sunTimesService: SunTimesService;
 
     // Layout parameters
     private readonly IMAGE_WIDTH = 1920;
@@ -59,11 +64,11 @@ export class SkyConditionsImage {
     private readonly LEFT_MARGIN = 250;     // Space for row labels
     private readonly TOP_MARGIN = 220;      // Space for title and time labels
     private readonly SQUARE_WIDTH = 20;     // Narrow squares horizontally (hours across)
-    private readonly SQUARE_HEIGHT = 30;    // Compressed height for 4-location layout
+    private readonly SQUARE_HEIGHT = 26;    // Compressed to fit a fourth value row
     private readonly SQUARE_BORDER = 2;     // Border between squares
     private readonly SQUARE_WITH_BORDER = this.SQUARE_WIDTH + this.SQUARE_BORDER;
     
-    private readonly LOCATION_ROW_HEIGHT = 236;  // Height for each location's 3 sub-rows
+    private readonly LOCATION_ROW_HEIGHT = 236;  // Keep block position; compress row heights inside
     private readonly SUB_ROW_HEIGHT = 80;        // Height for each data type row (legacy constant, not currently used)
     
     private readonly TIME_INTERVAL = 1;     // Show every 1 hour
@@ -74,6 +79,8 @@ export class SkyConditionsImage {
         this.logger = logger;
         this.imageWriter = imageWriter ?? null;
         this.kache = kache ?? null;
+        this.sunKache = this.kache ?? new Kache(this.logger, 'sun-times-cache.json');
+        this.sunTimesService = new SunTimesService(this.logger, this.sunKache);
         this.logger.info("SkyConditionsImage initialized");
     }
 
@@ -91,6 +98,7 @@ export class SkyConditionsImage {
         if (title) {
             this.drawTitle(ctx, title);
         }
+        this.drawMoonIllumination(ctx);
 
         const api = new AstrosphericAPI(this.logger, apiKey, baseURL, cacheDurationMinutes, this.kache ?? null, this.imageWriter ?? null);
         const forecasts: (AstrosphericResponse | null)[] = [];
@@ -107,7 +115,7 @@ export class SkyConditionsImage {
         }
 
         const locationRowHeight = this.LOCATION_ROW_HEIGHT;
-        const GAP_BETWEEN_ROWS = 15;
+        const GAP_BETWEEN_ROWS = 10;
         const subRowHeight = this.SQUARE_HEIGHT + GAP_BETWEEN_ROWS;
 
         let earliestLocalMidnight: moment.Moment | null = null;
@@ -129,7 +137,8 @@ export class SkyConditionsImage {
                 const yOffset = this.TOP_MARGIN + i * locationRowHeight;
                 this.drawTimeLabelsForLocation(ctx, forecast, locations[i], yOffset, globalStartUTC);
                 this.drawMidnightLinesForLocation(ctx, forecast, locations[i], yOffset, locationRowHeight, subRowHeight, globalStartUTC);
-                this.drawLocation(ctx, locations[i], forecast, yOffset, locationRowHeight, subRowHeight, globalStartUTC);
+                const sunStates = await this.buildSunStateTimeline(locations[i], globalStartUTC);
+                this.drawLocation(ctx, locations[i], forecast, yOffset, locationRowHeight, subRowHeight, globalStartUTC, sunStates);
             }
         }
 
@@ -189,6 +198,26 @@ export class SkyConditionsImage {
         const titleY = this.TOP_MARGIN - 150; // move title down so it's not clipped
         ctx.fillText(title, titleX, titleY);
         this.logger.verbose(`  Title position: (${titleX}, 40)`);
+    }
+
+    private drawMoonIllumination(ctx: any): void {
+        const phase = Astronomy.MoonPhase(new Date());
+        const illumination = (1 - Math.cos((phase * Math.PI) / 180)) / 2;
+        const percent = Math.round(illumination * 100);
+        const trend = phase <= 180 ? '+' : '-';
+        const label = `Moon ${percent}% ${trend}`;
+
+        const prevAlign = ctx.textAlign || 'start';
+        const prevBaseline = ctx.textBaseline || 'alphabetic';
+
+        ctx.fillStyle = this.TEXT_COLOR;
+        ctx.font = `38pt '${registeredFontName}'`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.fillText(label, this.IMAGE_WIDTH - 35, 30);
+
+        ctx.textAlign = prevAlign;
+        ctx.textBaseline = prevBaseline;
     }
 
     private drawTimeLabelsForLocation(ctx: any, forecast: AstrosphericResponse, location: Location, yOffset: number, globalStartUTC: moment.Moment): void {
@@ -258,7 +287,7 @@ export class SkyConditionsImage {
         // yStart should reach into label area where day labels live (labelY ~ yOffset - 20)
         const labelTop = yOffset - 36;
         const yStart = Math.max(40, labelTop); // don't go above title area
-        const yEnd = yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT; // bottom of Wind Speed
+        const yEnd = yOffset + subRowHeight * 3 + this.SQUARE_HEIGHT; // bottom of Sun row
 
         // If this location is west of the viewer's local timezone, skip only the first divider.
         // This removes the leading midnight line that appears near the start of the row for westward locations.
@@ -286,7 +315,7 @@ export class SkyConditionsImage {
         }
     }
 
-    private drawLocation(ctx: any, location: Location, forecast: AstrosphericResponse, yOffset: number, locationRowHeight: number, subRowHeight: number, globalStartUTC: moment.Moment): void {
+    private drawLocation(ctx: any, location: Location, forecast: AstrosphericResponse, yOffset: number, locationRowHeight: number, subRowHeight: number, globalStartUTC: moment.Moment, sunStates: string[]): void {
          this.logger.info(`Drawing location: ${location.label} at yOffset=${yOffset}`);
 
           // Draw location label above the rows (larger, with more space below)
@@ -305,8 +334,9 @@ export class SkyConditionsImage {
           // Shift labels slightly right for spacing
           const labelOffsetX = this.LABEL_MARGIN + 20;
           ctx.fillText("Clouds", labelOffsetX, yOffset + this.SQUARE_HEIGHT / 2 + 5);
-          ctx.fillText("Seeing", labelOffsetX, yOffset + subRowHeight + this.SQUARE_HEIGHT / 2 + 5);
-          ctx.fillText("Transparency", labelOffsetX, yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT / 2 + 5);
+          ctx.fillText("Transparency", labelOffsetX, yOffset + subRowHeight + this.SQUARE_HEIGHT / 2 + 5);
+          ctx.fillText("Seeing", labelOffsetX, yOffset + subRowHeight * 2 + this.SQUARE_HEIGHT / 2 + 5);
+          ctx.fillText("Sun", labelOffsetX, yOffset + subRowHeight * 3 + this.SQUARE_HEIGHT / 2 + 5);
           this.logger.verbose(`  Row labels drawn`);
 
          // Get current time in this location's timezone
@@ -325,6 +355,7 @@ export class SkyConditionsImage {
             ctx.fillRect(x, yOffset, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
             ctx.fillRect(x, yOffset + subRowHeight, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
             ctx.fillRect(x, yOffset + subRowHeight * 2, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
+            ctx.fillRect(x, yOffset + subRowHeight * 3, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
 
             const tUTC = globalStartUTC.clone().add(j, 'hours');
             const nowForLocationUTC = moment.tz(location.timezone).utc();
@@ -354,25 +385,85 @@ export class SkyConditionsImage {
                 ctx.fillRect(x, yOffset, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
             }
 
-            // Seeing
-            const seeingData = seeingSeries[indexToUse];
-            const seeingValue = seeingData?.Value?.ActualValue ?? null;
-            if (seeingValue !== null) {
-                ctx.fillStyle = this.getSeeingColor(seeingValue);
-                ctx.fillRect(x, yOffset + subRowHeight, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
-            }
-
             // Transparency
             const transparencyData = transparencySeries[indexToUse];
             const transparencyValue = transparencyData?.Value?.ActualValue ?? null;
             if (transparencyValue !== null) {
                 ctx.fillStyle = this.getTransparencyColor(transparencyValue);
+                ctx.fillRect(x, yOffset + subRowHeight, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
+            }
+
+            // Seeing
+            const seeingData = seeingSeries[indexToUse];
+            const seeingValue = seeingData?.Value?.ActualValue ?? null;
+            if (seeingValue !== null) {
+                ctx.fillStyle = this.getSeeingColor(seeingValue);
                 ctx.fillRect(x, yOffset + subRowHeight * 2, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
             }
+
+            ctx.fillStyle = sunStates[j] || '#081a3a';
+            ctx.fillRect(x, yOffset + subRowHeight * 3, this.SQUARE_WIDTH, this.SQUARE_HEIGHT);
          }
 
         // current time line removed by request
      }
+
+    private async buildSunStateTimeline(location: Location, globalStartUTC: moment.Moment): Promise<string[]> {
+        const colors: string[] = [];
+        const dayCache = new Map<string, { sunrise: moment.Moment; sunset: moment.Moment }>();
+
+        for (let j = 0; j < this.NUM_SQUARES; j++) {
+            const tUTC = globalStartUTC.clone().add(j, 'hours');
+            const localTime = tUTC.clone().tz(location.timezone);
+            const localDateKey = localTime.format('YYYY-MM-DD');
+
+            let daySun = dayCache.get(localDateKey);
+            if (!daySun) {
+                const localDate = localTime.clone().startOf('day');
+                const sunTimes = await this.sunTimesService.getSunTimes(location, localDate);
+                daySun = { sunrise: sunTimes.sunriseLocal, sunset: sunTimes.sunsetLocal };
+                dayCache.set(localDateKey, daySun);
+            }
+
+            colors.push(this.getSunStateColor(localTime, daySun.sunrise, daySun.sunset));
+        }
+
+        return colors;
+    }
+
+    private getSunStateColor(localTime: moment.Moment, sunrise: moment.Moment, sunset: moment.Moment): string {
+        const DAYLIGHT = '#f5efc8';
+        const NIGHT = '#081a3a';
+        const GOLDEN = '#e98a2a';
+        const TWILIGHT = '#2e2c58';
+
+        const dawnTwilightStart = sunrise.clone().subtract(2, 'hours');
+        const dawnGoldenStart = sunrise.clone().subtract(1, 'hours');
+        const duskGoldenEnd = sunset.clone().add(1, 'hours');
+        const duskTwilightEnd = sunset.clone().add(2, 'hours');
+
+        if (localTime.isSameOrAfter(sunrise) && localTime.isSameOrBefore(sunset)) {
+            return DAYLIGHT;
+        }
+
+        if (localTime.isSameOrAfter(dawnGoldenStart) && localTime.isBefore(sunrise)) {
+            return GOLDEN;
+        }
+
+        if (localTime.isAfter(sunset) && localTime.isSameOrBefore(duskGoldenEnd)) {
+            return GOLDEN;
+        }
+
+        if (localTime.isSameOrAfter(dawnTwilightStart) && localTime.isBefore(dawnGoldenStart)) {
+            return TWILIGHT;
+        }
+
+        if (localTime.isAfter(duskGoldenEnd) && localTime.isSameOrBefore(duskTwilightEnd)) {
+            return TWILIGHT;
+        }
+
+        return NIGHT;
+    }
 
     private getCloudCoverColor(cloudPercent: number): string {
         // Map 0-100% to a mid-muted color gradient (between the original vivid scale and the prior desaturated one)
